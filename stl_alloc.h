@@ -19,7 +19,7 @@ private:
 
 public:
     static void *allocate(size_t n) {
-	    void *result = malloc(n);
+        void *result = malloc(n);
         if (0 == result)
             result = oom_malloc(n);
         return result;
@@ -27,7 +27,7 @@ public:
 
     static void deallocate(void* p, size_t /*n*/)
     {
-	    free(p);
+        free(p);
     }
 
     static void *reallocate(void *p, size_t /*old_sz*/, size_t new_sz) {
