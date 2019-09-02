@@ -7,8 +7,12 @@
 #include <string.h>
 #include <assert.h>
 
+#include "stl_config.h"
+
 #define __NODE_ALLOCATOR_THREADS false
 #define __THROW_BAD_ALLOC std::cerr << "out of memoty" << std::endl; exit(1)
+
+__STL_BEGIN_NAMESPACE
 
 template<int inst>
 class __malloc_alloc_template {
@@ -277,5 +281,7 @@ __default_alloc_template<threads, inst>::freeLists[
     __default_alloc_template<threads, inst>::NFREELISTS
 #endif
     ] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
+
+__STL_END_NAMESPACE
 
 #endif
