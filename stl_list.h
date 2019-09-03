@@ -118,6 +118,31 @@ protected:
         node->next = node;
         node->prev = node;
     }
+    
+    void fill_initialize(size_type n, const T& value) {
+        empty_initialize();
+        __STL_TRY {
+            insert(begin(), n, value);
+        }
+        __STL_UNWIND(clear(); put_node(node));
+    }
+
+    template<class InputIterator>
+    void range_initialize(InputIterator first, InputIterator last) {
+        empty_initialize();
+        __STL_TRY {
+            insert(begin(), first, last);
+        }
+        __STL_UNWIND(clear(); put_node(node));
+    }
+
+    void range_initialize(const T& first, const T& last) {
+        empty_initialize();
+        __STL_TRY {
+            insert(begin(), first, last);
+        }
+        __STL_UNWIND(clear(); put_node(node));
+    }
 
 protected:
     link_type node;
@@ -147,7 +172,7 @@ public:
     const_reference front() const { return *begin(); }
     reference back() { return *(--end()); }
     const_reference back() const { return *(--end()); }
-    void swap(list<T, Alloc>& x) { __STD::swap(node, x.node); }
+    void swap(list<T, Alloc>& x) { std::swap(node, x.node); }
     iterator insert(iterator position, const T& x) {
         link_type tmp = create_node(x);
         tmp->next = position.node;
@@ -165,7 +190,83 @@ public:
      void insert(iterator pos, long n, const T& x) {
         insert(pos, (size_type)n, x);
     }  
+
+    void push_front(const T& x) { insert(begin(), x); }
+    void push_back(const T& x) { insert(end(), x); }
+    iterator erase(iterator position) {
+        link_type next_node = link_type(position.node->next);
+        link_type prev_node = link_type(position.node->prev);
+        prev_node->next = next_node;
+        next_node->prev = prev_node;
+        destroy_node(position.node);
+        return iterator(next_node);
+    }
+    iterator erase(iterator first, iterator last);
+    void resize(size_type new_size, const T& x);
+    void resize(size_type new_size) { resize(new_size, T()); }
+    void clear();
+
+    void pop_front() { erase(begin()); }
+    void pop_back() {
+        iterator tmp = end();
+        erase(--tmp);
+    }
+    list(size_type n, const T& value) { fill_initialize(n, value); }
+    list(int n, const T& value) { fill_initialize(n, value); }
+    list(long n, const T& value) { fill_initialize(n, value); }
+    explicit list(size_type n) { fill_initialize(n, T()); }
+    
+    template<class InputIterator>
+    list(InputIterator first, InputIterator last) {
+        range_initialize(first, last);
+    }
+    list(const list<T, Alloc>& x) {
+        range_initialize(x.begin(), x.end());
+    }
+    ~list() {
+        clear();
+        put_node(node);
+    }
+    list<T, Alloc>& operator=(const list<T, Alloc>& x);
+
+protected:
+    // first position last ==> last first position
+    void transfer(iterator position, iterator first, iterator last) {
+        if (position != last) {
+            (*(link_type((*last.node).prev))).next = position.node;
+            (*(link_type((*first.node).prev))).next = last.node;
+            (*(link_type((*position.node).prev))).next = first.node;  
+            link_type tmp = link_type((*position.node).prev);
+            (*position.node).prev = (*last.node).prev;
+            (*last.node).prev = (*first.node).prev; 
+            (*first.node).prev = tmp;
+        }
+    }
+
+public: 
+    void splice(iterator position, list& x) {
+        if (!x.empty())
+            transfer(position, x.begin(), x.end());
+    }
+    void splice(iterator position, list&, iterator first, iterator last) {
+        if (first != last)
+            transfer(position, first, last);
+    }
+    void remove(const T& value);
+    void unique();
+    void merge(list& x);
+    reverse();
+    sort();
+
+    friend bool operator==(const list& x, const list& y);
 };
+
+
+
+template<class T, class Alloc>
+inline void swap(list<T, Alloc>& x, list<T, Alloc>& y) {
+    x.swap(y);
+}
 
 __STL_END_NAMESPACE
 
