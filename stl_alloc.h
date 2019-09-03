@@ -7,8 +7,6 @@
 #include <string.h>
 #include <assert.h>
 
-#include "stl_config.h"
-
 #define __NODE_ALLOCATOR_THREADS false
 #define __THROW_BAD_ALLOC std::cerr << "out of memoty" << std::endl; exit(1)
 
@@ -91,21 +89,13 @@ void *__malloc_alloc_template<inst>::oom_realloc(void *p, size_t n)
 
 typedef __malloc_alloc_template<0> malloc_alloc;
 
-#ifdef __SUNPRO_CC
-enum { ALIGN = 8 };
-enum { MAX_BYTES = 128 };
-enum { NFREELISTS = MAX_BYTES / ALIGN };  
-#endif
-
 template<bool threads, int inst>
 class __default_alloc_template {
 
 private:
-#ifndef __SUNPRO_CC
 	enum { ALIGN = 8 };
 	enum { MAX_BYTES = 128 };
 	enum { NFREELISTS = MAX_BYTES / ALIGN };  
-#endif
 
 	static size_t ROUND_UP(size_t bytes) {
 		return ((bytes + (size_t)ALIGN - 1) & ~(ALIGN - 1));
@@ -275,12 +265,8 @@ size_t __default_alloc_template<threads, inst>::heap_size = 0;
 template<bool threads, int inst>
 typename __default_alloc_template<threads, inst>::obj *volatile 
 __default_alloc_template<threads, inst>::freeLists[
-#ifdef __SUNPRO_CC
-    NFREELISTS
-#else
-    __default_alloc_template<threads, inst>::NFREELISTS
-#endif
-    ] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
+    __default_alloc_template<threads, inst>::NFREELISTS] 
+    = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
 
 __STL_END_NAMESPACE
 
