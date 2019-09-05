@@ -261,6 +261,94 @@ public:
     friend bool operator==(const list& x, const list& y);
 };
 
+template<class T, class Alloc>
+inline bool operator==(const list<T, Alloc>& x, const list<T, Alloc>& y) {
+    return lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());
+}
+
+template<class T, class Alloc> template<class InputIterator>
+void list<T, Alloc>::insert(iterator position,
+                            InputIterator first, InputIterator last) {
+    for ( ; first != last; ++first)
+        insert(position, *first);
+}
+
+template<class T, class Alloc>
+list<T, Alloc>::iterator list<T, Alloc>::erase(iterator first, iterator last) {
+    while (first != last) erase(first++);
+    return last;
+}
+
+template<class T, class Alloc>
+void list<T, Alloc>::resize(size_type new_size, const T& x)
+{
+    iterator i = begin();
+    size_type len = 0;
+    for ( ; i != end(); ++i, ++len)
+        ;
+    if (len == new_size)
+        erase(i, end());
+    else
+        insert(end(), new_size - len, x);
+}
+
+template<class T, class Alloc>
+void list<T, Alloc>::clear()
+{
+    link_type cur = (link_type)node->next;
+    while (cur != node) {
+        link_type tmp = cur;
+        cur = (link_type)cur->next;
+        destroy_node(tmp);
+    }
+    node->next = node;
+    node->prev = node;
+}
+
+template<class T, class Alloc>
+list<T, Alloc>& list<T, Alloc>::operator=(const list<T, Alloc>& x) {
+    if (this != &x) {
+        iterator first1 = begin();
+        iterator last1 = end();
+        const_iterator first2 = x.begin();
+        const_iterator last2 = x.end();
+        while (first1 != last1 && first2 != last2) *first1++ = *first2++;
+        if (first2 == last2)
+            erase(first1, last1);
+        else 
+            insert(first1, first2, last2);
+    }
+    return *this;
+}
+
+template<class T, class Alloc>
+void list<T, Alloc>::remove(const T& value) {
+    iterator first = begin();
+    iterator last = end();
+    while (first != last) {
+        iterator next = first;
+        ++next;
+        if (*first == value) erase(first);
+        first = next;
+    }
+}
+
+template<class T, class Alloc>
+void list<T, Alloc>::unique() {
+    iterator first = begin();
+    iterator last = end();
+    if (first == last) return;
+    iterator next = first;
+    while (++next != last) {
+        if (*first == *next)
+            erase(next);
+        else
+            first = next;
+        next = first;
+    }
+}
+
+
 
 
 template<class T, class Alloc>
