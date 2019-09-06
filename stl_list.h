@@ -231,6 +231,7 @@ public:
 
 protected:
     // first position last ==> last first position
+    // 迁移动作，将某连续范围的元素迁移到某个特定位置之前
     void transfer(iterator position, iterator first, iterator last) {
         if (position != last) {
             (*(link_type((*last.node).prev))).next = position.node;
@@ -255,8 +256,8 @@ public:
     void remove(const T& value);
     void unique();
     void merge(list& x);
-    reverse();
-    sort();
+    void reverse();
+    void sort();
 
     friend bool operator==(const list& x, const list& y);
 };
@@ -348,7 +349,40 @@ void list<T, Alloc>::unique() {
     }
 }
 
+template<class T, class Alloc>
+void list<T, Alloc>::merge(list<T, Alloc>& x) {
+    iterator first1 = begin();
+    iterator last1 = end();
+    iterator first2 = x.begin();
+    iterator last2 = x.end();
+    while (first1 != last1 && first2 != last2) 
+        if (*first2 < *first1) {
+            iterator next = first2;
+            transfer(first1, first2, ++next);
+            first2 = next;
+        }
+        else
+            first1++;
+    if (first2 != last2) transfer(first1, first2, last2);
+}
 
+template<class T, class Alloc>
+void list<T, Alloc>::reverse() {
+    if (node->next == node || link_type(node->next)->next == node) return;
+    iterator first = begin();
+    ++first;
+    while (first != end()) {
+        iterator old = first;
+        ++first;
+        transfer(begin(), old, first);
+    }
+}
+
+template<class T, class Alloc>
+void list<T, Alloc>::sort() {
+    if (node->next == node || link_type(node->next)->next == node) return;
+    
+}
 
 
 template<class T, class Alloc>
