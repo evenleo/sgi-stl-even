@@ -4,19 +4,18 @@
 #include <iostream>
 #include <random>
 #include <initializer_list>
-#include <time.h>
+#include <ctime>
 
 template<typename T>
 class skiplist {
 public:
     using value_type = T;
-    using pointer = T*;
-    using size_type = size_t;
+    using size_type = int;
     
 private:
     const static size_type MAX_LEVEL = 16;
 
-private:
+public:
     struct node {
         node(value_type x, size_type l) : value(x), max_level(l) {
             for (size_type i=0; i<MAX_LEVEL; ++i) {
@@ -31,7 +30,7 @@ private:
 public:
     skiplist() {
         levelCount = 1;
-        listHead = new node(-1, 0);
+        listHead = new node(value_type(), 0);
     };
     skiplist(std::initializer_list<value_type> init) : skiplist() {
         for (const value_type& x : init) {
@@ -60,13 +59,7 @@ public:
             update[i] = listHead;
         }
         node* pNode = listHead;
-        std::cout << "insert..." << std::endl;
         for (size_type i=level-1; i>=0; --i) {
-            if (nullptr != pNode->forwards[i]) 
-            {
-                std::cout << "ofofo" << std::endl;
-            }
-           
             while ((nullptr != pNode->forwards[i]) && (pNode->forwards[i]->value < x)) {
                 pNode = pNode->forwards[i];
             }
@@ -99,17 +92,32 @@ public:
             levelCount--;
         }
     }
-    void pintAll() {
+    void printAll() {
         node* pNode = listHead;
         while (nullptr != pNode->forwards[0]) {
-            std::cout << pNode->forwards[0]->value << ", " << std::endl;
+            std::cout << pNode->forwards[0]->value << ", ";
             pNode = pNode->forwards[0];
         }
     }
-    void printLevel(size_type l);
+    void printAll(size_type l) {
+        for(size_type i=MAX_LEVEL-1; i >=0; --i) {
+            node* pNode = listHead;
+            std::cout << "level: " << i << std::endl;
+            if (l < 0 || (l >=0 && l == i)) {
+                while (nullptr != pNode->forwards[i]) {
+                    std::cout << pNode->forwards[i]->value << " ";
+                    pNode = pNode->forwards[i];
+                }
+                std::cout << std::endl;
+                if (l >= 0) {
+                    break;
+                }
+            }
+        }
+    }
     size_type randomLevel() {
         size_type level = 1;
-        for (int i=1; i < MAX_LEVEL; ++i) {
+        for (size_type i=1; i < MAX_LEVEL; ++i) {
             if (getRandom() % 3 == 1) {
                 level++;
             }

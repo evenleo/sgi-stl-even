@@ -11,8 +11,19 @@ using namespace std;
 
 int main()
 {
-    skiplist<int> ii{1, 2, 3, 4, 5};
-    ii.pintAll();
+    skiplist<int> ii;
+    for(int i=1; i< 50; i++){
+        if((i%3) == 0){
+            ii.insert(i);
+        }
+    }
+    for(int i=1; i< 50; i++){
+        if((i%3) == 1){
+            ii.insert(i);
+        }
+    }
+    ii.printAll();
+    ii.printAll(-1);
 
     system("pause");
     return 0;
