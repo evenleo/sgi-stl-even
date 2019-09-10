@@ -11,8 +11,9 @@ using namespace std;
 
 int main()
 {
-    skiplist<int> *list = new skiplist<int>;
-    list->test();
+    skiplist<int> ii{1, 2, 3, 4, 5};
+    ii.pintAll();
+
     system("pause");
     return 0;
 }
