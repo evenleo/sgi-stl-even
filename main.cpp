@@ -4,12 +4,15 @@
 #include "stl_alloc.h"
 #include "stl_iterator.h"
 #include "stl_list.h"
+#include "skiplist.h"
 
 using namespace std;
 
+
 int main()
 {
-    cout << "hello" << endl;
+    skiplist<int> *list = new skiplist<int>;
+    list->test();
     system("pause");
     return 0;
 }

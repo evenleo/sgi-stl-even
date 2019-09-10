@@ -274,7 +274,8 @@ void list<T, Alloc>::insert(iterator position,
 }
 
 template<class T, class Alloc>
-list<T, Alloc>::iterator list<T, Alloc>::erase(iterator first, iterator last) {
+typename list<T, Alloc>::iterator 
+list<T, Alloc>::erase(iterator first, iterator last) {
     while (first != last) erase(first++);
     return last;
 }
