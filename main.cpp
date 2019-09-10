@@ -23,6 +23,7 @@ int main()
         }
     }
     ii.printAll();
+    std::cout << std::endl;
     ii.printAll(-1);
 
     system("pause");

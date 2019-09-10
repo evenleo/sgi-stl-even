@@ -15,22 +15,19 @@ public:
 private:
     const static size_type MAX_LEVEL = 16;
 
-public:
+private:
     struct node {
-        node(value_type x, size_type l) : value(x), max_level(l) {
-            for (size_type i=0; i<MAX_LEVEL; ++i) {
-                forwards[i] = nullptr;
-            }
-        }
+        node(value_type x, size_type l) : value(x), max_level(l) {}
         value_type value;
-        node* forwards[MAX_LEVEL];
+        node* forwards[MAX_LEVEL] = { nullptr };
         size_type max_level;
     };
+    using node_type = node;
 
 public:
     skiplist() {
         levelCount = 1;
-        listHead = new node(value_type(), 0);
+        listHead = new node_type(value_type(), 0);
     };
     skiplist(std::initializer_list<value_type> init) : skiplist() {
         for (const value_type& x : init) {
@@ -40,8 +37,8 @@ public:
     ~skiplist() {
         delete listHead;
     }
-    node* find(const value_type& x) {
-        node* pNode = listHead;
+    node_type* find(const value_type& x) {
+        node_type* pNode = listHead;
         for (int i = levelCount-1; i>=0; --i) {
             while (nullptr != pNode->forwards[i] && pNode->forwards[i]->value < x) {
                 pNode = pNode->forwards[i];
@@ -53,12 +50,12 @@ public:
     }
     void insert(const value_type& x) {
         size_type level = randomLevel();
-        node* newNode = new node(x, level);
-        node* update[level];
+        node_type* newNode = new node_type(x, level);
+        node_type* update[level];
         for (size_type i=0; i < level; ++i) {
             update[i] = listHead;
         }
-        node* pNode = listHead;
+        node_type* pNode = listHead;
         for (size_type i=level-1; i>=0; --i) {
             while ((nullptr != pNode->forwards[i]) && (pNode->forwards[i]->value < x)) {
                 pNode = pNode->forwards[i];
@@ -66,15 +63,15 @@ public:
             update[i] = pNode;
         }
         for (size_type i=0; i<level; ++i) {
-            newNode->forwards[i] = pNode->forwards[i];
-            pNode->forwards[i] = newNode;
+            newNode->forwards[i] = update[i]->forwards[i];
+            update[i]->forwards[i] = newNode;
         }
         
         if (levelCount < level) levelCount = level;
     }
     void erase(const value_type& x) {
-        node* update[levelCount];
-        node* pNode = listHead;
+        node_type* update[levelCount];
+        node_type* pNode = listHead;
         for (size_type i=levelCount-1; i>=0; --i) {
             while (nullptr != pNode->forwards[i] && pNode->forwards[i]->value < x) {
                 pNode = pNode->forwards[i];
@@ -84,16 +81,17 @@ public:
         if (nullptr != pNode->forwards[0] && pNode->forwards[0]->value == x) {
             for (size_type i=levelCount-1; i>=0; --i) {
                 if (nullptr != update[i]->forwards[i] && x == update->forwards[i]->value) {
-                    update[i]->forwards[i] = update->forwards[i]->forwards[i];
+                    update[i]->forwards[i] = update[i]->forwards[i]->forwards[i];
                 }
             }
+            delete pNode->forwards[0];
         }
         while (levelCount > 1 && listHead->forwards[levelCount] == nullptr) {
             levelCount--;
         }
     }
     void printAll() {
-        node* pNode = listHead;
+        node_type* pNode = listHead;
         while (nullptr != pNode->forwards[0]) {
             std::cout << pNode->forwards[0]->value << ", ";
             pNode = pNode->forwards[0];
@@ -101,7 +99,7 @@ public:
     }
     void printAll(size_type l) {
         for(size_type i=MAX_LEVEL-1; i >=0; --i) {
-            node* pNode = listHead;
+            node_type* pNode = listHead;
             std::cout << "level: " << i << std::endl;
             if (l < 0 || (l >=0 && l == i)) {
                 while (nullptr != pNode->forwards[i]) {
@@ -125,12 +123,6 @@ public:
         return level;
     }
 
-    void test() {
-        for (int i=0; i<10; ++i) {
-            std::cout << randomLevel() << std::endl;
-        }
-    }
-
 private:
     size_type getRandom() {
         static size_type count = 1;
@@ -141,7 +133,7 @@ private:
     }
 private:
     size_type levelCount;
-    node* listHead;
+    node_type* listHead;
 };
 
 #endif
