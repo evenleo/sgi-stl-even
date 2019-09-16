@@ -201,6 +201,7 @@ char *__default_alloc_template<threads, inst>::chunk_alloc(size_t size, int& nob
         if (0 == start_free) {
             int i;
             obj *volatile *my_free_list, *p;
+            /*系统实在没有内存了，向上释放链表已用内存*/
             for (i = size; i <= MAX_BYTES; i += ALIGN) {
                 my_free_list = freeLists + FREELIST_INDEX(i);
                 p = *my_free_list;
