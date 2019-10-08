@@ -4,10 +4,15 @@
 #define __STL_USE_NAMESPACE
 #define __STL_CLASS_PARTIAL_SPECIALIZATION
 #define __STL_USE_EXCEPTIONS
+#define __STL_MEMBER_TEMPLATES
 
 #ifdef __STL_USE_NAMESPACE
 #define __STL_BEGIN_NAMESPACE namespace STD {
 #define __STL_END_NAMESPACE }
+
+#define __STL_BEGIN_RELOPS_NAMESPACE namespace STD {
+#define __STL_END_RELOPS_NAMESPACE }
+
 #endif
 
 #ifdef __STL_USE_EXCEPTIONS
