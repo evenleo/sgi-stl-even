@@ -178,6 +178,7 @@ public:
         tmp->next = position.node;
         tmp->prev = position.node->prev;
         (link_type(position.node->prev))->next = tmp;
+        position.node->prev = tmp;
         return tmp;
     }
     iterator insert(iterator position) { return insert(position, T()); }

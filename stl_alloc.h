@@ -206,7 +206,7 @@ char *__default_alloc_template<threads, inst>::chunk_alloc(size_t size, int& nob
                 my_free_list = freeLists + FREELIST_INDEX(i);
                 p = *my_free_list;
                 if (0 != p) {
-                    my_free_list = p->free_list_link;
+                    *my_free_list = p->free_list_link;
                     start_free = (char*)p;
                     end_free = start_free + i;
                     return chunk_alloc(size, nobjs);
@@ -231,7 +231,7 @@ void *__default_alloc_template<threads, inst>::refill(size_t n)
     obj* current_obj, *next_obj;
     int i;
 
-    if (1 = nobjs) return chunk;
+    if (1 == nobjs) return chunk;
     my_free_list = freeLists + FREELIST_INDEX(n);
     result = (obj*)chunk;
     *my_free_list = next_obj = (obj*)(chunk + n);

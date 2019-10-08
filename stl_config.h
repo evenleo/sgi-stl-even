@@ -18,6 +18,8 @@
 #define __STL_UNWIND(action) catch(...) { action; throw; }
 #endif
 
+#define __STL_TEMPLATE_NULL template<>
+
 #ifdef _WIN64
 typedef long long ptrdiff_t;
 #else
