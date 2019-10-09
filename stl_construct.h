@@ -17,9 +17,18 @@ inline void destroy(T* pointer)
 }
 
 template <class ForwardIterator>
-inline void destroy(ForwardIterator first, ForwardIterator last) {
-    __destroy(first, last, value_type(first));
+inline void __destroy_aux(ForwardIterator, ForwardIterator, __true_type) {
+    //no_op
 }
+
+template <class ForwardIterator>
+inline void __destroy_aux(ForwardIterator first, ForwardIterator last, __false_type) {
+    for ( ; first < last; ++first) 
+        destroy(&*first);
+}
+
+inline void destroy(char*, char*) {  }
+inline void destroy(wchar_t*, wchar_t*) {  }
 
 template <class ForwardIterator, class T>
 inline void __destroy(ForwardIterator first, ForwardIterator last, T*)
@@ -29,18 +38,9 @@ inline void __destroy(ForwardIterator first, ForwardIterator last, T*)
 }
 
 template <class ForwardIterator>
-inline void __destroy(ForwardIterator, ForwardIterator, __true_type) {
-    //no_op
+inline void destroy(ForwardIterator first, ForwardIterator last) {
+    __destroy(first, last, value_type(first));
 }
-
-template <class ForwardIterator>
-inline void __destroy(ForwardIterator first, ForwardIterator last, __false_type) {
-    for ( ; first < last; ++first) 
-        destroy(&*first);
-}
-
-inline void destroy(char*, char*) {  }
-inline void destroy(wchar_t*, wchar_t*) {  }
 
 __STL_END_NAMESPACE
 

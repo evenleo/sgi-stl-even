@@ -208,8 +208,6 @@ public:
         erase(begin(), end());
     }
 
-
-
 protected:
     iterator allocate_and_fill(size_type n, const T& x) {
         iterator result = data_allocator::allocate(n);
