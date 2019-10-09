@@ -88,21 +88,182 @@ public:
         finish = start + (x.end() - x.begin());
         end_of_storage = finish;
     }
+    template <class InputIterator>
+    vector(InputIterator first, InputIterator last) :
+        start(0), finish(0), end_of_storage(0)
+    {
+        range_initialize(first, last, iterator_category(first));
+    }
 
-protected:
-    iterator allocate_and_fill(size_type n, const T& x) {
-        iterator result = data_allocator::allocate(n);
-        // __STL_TRY 
-        {
-            
+    ~vector() {
+        destroy(start, finish);
+        deallocate();
+    }
+
+    vector<T, Alloc>& operator=(const vector<T, Alloc>& x);
+
+    void reverve(size_type n) {
+        if (capacity() < n) {
+            const size_type old_size = size();
+            iterator tmp = allocate_and_copy(n, start, finish);
+            destroy(start, finish);
+            deallocate();
+            start = tmp;
+            finish = start + old_size;
+            end_of_storage = start + n;
         }
+    }
+
+    reference front() { return *begin(); }
+    const_reference front() const { return *begin(); }
+    reference back() { return *(end() - 1); }
+    const_reference back() const { return *(end() - 1); }
+
+    void push_back(const T& x) {
+        if (finish != end_of_storage) {
+            construct(finish, x);
+            ++finish;
+        } else
+            insert_aux(end(), x);
+    }
+
+    void swap(vector<T, Alloc>& x) {
+        __STD::swap(start, x.start);
+        __STD::swap(finish, x.finish);
+        __STD::swap(end_of_storage, x.end_of_storage);
+    }
+
+    iterator insert(iterator position, const T& x) {
+        size_type n = position - begin();
+        if (finish != end_of_storage && position == end()) {
+            construct(finish, x);
+        } else 
+            insert_aux(position, x);
+
+        return begin() + n;
+    }
+    
+    iterator insert(iterator position) {
+        insert(position, T());
+    }
+
+    #ifdef __STL_MEMBER_TEMPLATES
+    template <class InputIterator>
+    void insert(iterator position, InputIterator first, InputIterator last) 
+    {
+        range_insert(position, first, last, iterator_category(first));
+    }
+    #endif
+
+    void insert(iterator pos, size_type n, const T& x);
+
+    void insert(iterator pos, int n, const T& x) {
+        insert(pos, (size_type) n, x);
+    }
+    
+    void insert(iterator pos, long n, const T& x) {
+        insert(pos, (size_type) n, x);
+    }
+
+    void pop_back() {
+        --finish;
+        destroy(finish);	//finish->~T 这里仅仅是调用指针finish所指对象的析构函数，不能释放内存
+    }
+  
+    iterator erase(iterator position) {
+        //如果移除的不是最后一个元素
+        if (position + 1 != end())
+            copy(position + 1, finish, position);
+
+        --finish;
+        destroy(finish);
+        return position;
+    }
+
+    //移除半开半闭区间[first, last)之间的所有元素，last指向的元素不被移除
+    iterator erase(iterator first, iterator last) {
+        iterator i = copy(last, finish, first);
+        //如果区间内元素的析构函数是trivial的，则什么也不做
+        //如果区间内元素的析构函数是non-trivial的，则依序调用其析构函数
+        destroy(i, finish);	
+        finish = finish - (last - first);	//重新调整finish
+        return first;
+    }
+    
+    void resize(size_type new_size, const T& x) 
+    {
+        if (new_size < size()) 
+            erase(begin() + new_size, end());
+        else
+            insert(end(), new_size - size(), x);
+    }
+    
+    void resize(size_type new_size) 
+    { 
+        resize(new_size, T()); 
+    }
+
+    void clear() 
+    {
+        erase(begin(), end());
     }
 
 
 
+protected:
+    iterator allocate_and_fill(size_type n, const T& x) {
+        iterator result = data_allocator::allocate(n);
+        __STL_TRY 
+        {
+            uninitialized_fill_n(result, n, x);
+            return result;
+        }
+        __STL_UNWIND(data_allocator::deallocate(result, n));
+    }
 
+    template <class ForwardIterator>
+    iterator allocate_and_copy(size_type n,
+                               ForwardIterator first, ForwardIterator last) {
+        iterator result = data_allocator::allocate(n);
+        __STL_TRY {
+            uninitialized_copy(first, last, result);
+            return result;
+        }
+        __STL_UNWIND(data_allocator::deallocate(result, n));
+    }
 
+    template <class InputIterator>
+    void range_initialize(InputIterator first, InputIterator last,
+    input_iterator_tag) {
+        for ( ; first != last; ++first)
+            push_back(*first);
+    }
+
+    template <class ForwardIterator>
+    void range_initialize(ForwardIterator first, ForwardIterator last,
+    forward_iterator_tag) {
+        size_type n = 0;
+        distance(first, last, n);
+        start = allocate_and_copy(n, first, last);
+        finish = start + n;
+        end_of_storage = finish;
+    }
+
+    template <class InputIterator>
+    void range_insert(iterator pos,
+                      InputIterator first, InputIterator last,
+                      input_iterator_tag);
+
+    template <class ForwardIterator>
+    void range_insert(iterator pos,
+                      ForwardIterator first, ForwardIterator last,
+                      forward_iterator_tag);
 };
+
+template <class T, class Alloc>
+inline void swap(vector<T, Alloc>& x, vector<T, Alloc>& y) {
+  x.swap(y);
+}
 
 __STL_END_NAMESPACE
 

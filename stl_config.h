@@ -7,6 +7,7 @@
 #define __STL_MEMBER_TEMPLATES
 
 #ifdef __STL_USE_NAMESPACE
+#define __STD STD
 #define __STL_BEGIN_NAMESPACE namespace STD {
 #define __STL_END_NAMESPACE }
 
