@@ -314,8 +314,7 @@ void vector<T, Alloc>::insert_aux(iterator position, const T& x) {
             ++new_finish;
             new_finish = uninitialized_copy(position, finish, new_finish);
         }
-        catch(...) 
-        {
+        catch(...) {
             destroy(new_start, new_finish); 
             data_allocator::deallocate(new_start, len);
             throw;
@@ -325,6 +324,50 @@ void vector<T, Alloc>::insert_aux(iterator position, const T& x) {
         start = new_start;
         finish = new_finish;
         end_of_storage = new_start + len;
+    }
+}
+
+template <class T, class Alloc>
+void vector<T, Alloc>::insert(iterator position, size_type n, const T& x) {
+    if (n != 0) {
+        if (size_type(end_of_storage - finish) >= n) {
+            T x_copy = x;
+            const size_type elems_after = finish - position;
+            iterator old_finish = finish;
+            if (elems_after > n) {
+                uninitialized_copy(finish - n, finish, finish);
+                finish += n;
+                copy_backward(position, old_finish - n, old_finish);
+                fill(position, position + n, x_copy);
+            } else {
+                uninitialized_fill_n(finish, n - elems_after, x_copy);
+                finish += n - elems_after;
+                uninitialized_copy(position, old_finish, finish);
+                finish += elems_after;
+                fill(position, old_finish, x_copy);
+            }
+        } else {
+            const size_type old_size = size();        
+            const size_type len = old_size + max(old_size, n);
+            iterator new_start = data_allocator::allocate(len);
+            iterator new_finish = new_start;
+            __STL_TRY 
+            {
+                new_finish = uninitialized_copy(start, position, new_start);
+                new_finish = uninitialized_fill_n(new_finish, n, x);
+                new_finish = uninitialized_copy(position, finish, new_finish);
+            }
+            catch(...) {
+                destroy(new_start, new_finish);
+                data_allocator::deallocate(new_start, len);
+                throw;
+            }
+            destroy(start, finish);
+            deallocate();
+            start = new_start;
+            finish = new_finish;
+            end_of_storage = new_start + len;
+        }
     }
 }
 

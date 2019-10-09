@@ -34,6 +34,14 @@ void vector_test() {
         std::cout << i << " ";
     }
     std::cout << std::endl;
+
+    STD::vector<int>::iterator iter = vec.begin();
+    vec.insert(iter+2, 10);
+     for (auto i : vec) {
+        std::cout << i << " ";
+    }
+    std::cout << std::endl;
+
 }
 
 int main()
