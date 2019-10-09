@@ -5,22 +5,6 @@ __STL_BEGIN_NAMESPACE
 
 template<class InputIterator, class ForwardIterator>
 inline ForwardIterator
-uninitialized_copy(InputIterator first, InputIterator last,
-                       ForwardIterator result)
-{
-    return __uninitialized_copy(first, last, result, value_type(result));
-}
-
-template<class InputIterator, class ForwardIterator, class T>
-inline ForwardIterator
-__uninitialized_copy(InputIterator first, InputIterator last,
-                     ForwardIterator result, T*) {
-    typedef typename __type_traits<T>::is_POD_type is_POD;
-    return __uninitialized_copy_aux(first, last, result, is_POD());
-}
-
-template<class InputIterator, class ForwardIterator>
-inline ForwardIterator
 __uninitialized_copy_aux(InputIterator first, InputIterator last,
                          ForwardIterator result, __true_type)
 {
@@ -40,6 +24,22 @@ __uninitialized_copy_aux(InputIterator first, InputIterator last,
         return cur;
     }
     __STL_UNWIND(destroy(result, cur));
+}
+
+template<class InputIterator, class ForwardIterator, class T>
+inline ForwardIterator
+__uninitialized_copy(InputIterator first, InputIterator last,
+                     ForwardIterator result, T*) {
+    typedef typename __type_traits<T>::is_POD_type is_POD;
+    return __uninitialized_copy_aux(first, last, result, is_POD());
+}
+
+template<class InputIterator, class ForwardIterator>
+inline ForwardIterator
+uninitialized_copy(InputIterator first, InputIterator last,
+                       ForwardIterator result)
+{
+    return __uninitialized_copy(first, last, result, value_type(result));
 }
 
 template<class ForwardIterator, class Size, class T>
