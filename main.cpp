@@ -25,8 +25,21 @@ void list_test() {
     std::cout << std::endl;
 }
 
+struct MM {
+    int val;
+    MM(int x) : val(x) {}
+};
+
+void vector_test2() {
+    STD::vector<MM> vec(2, MM(22));
+     for (auto i : vec) {
+        std::cout << i.val << " ";
+    }
+    std::cout << std::endl;
+}
+
 void vector_test() {
-    STD::vector<int> vec;
+    STD::vector<int> vec(2, 11);
     for (int i=0; i<10; ++i) {
         vec.push_back(i);
     }
@@ -36,7 +49,7 @@ void vector_test() {
     std::cout << std::endl;
 
     STD::vector<int>::iterator iter = vec.begin();
-    vec.insert(iter+2, 10);
+    vec.insert(iter+2, 1, 10);
      for (auto i : vec) {
         std::cout << i << " ";
     }
