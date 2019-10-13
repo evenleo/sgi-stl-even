@@ -12,6 +12,8 @@
 #include "stl_vector.h"
 #include "stl_list.h"
 
+// #include <vecotor_sgi>
+
 void list_test() {
     STD::list<int> list;
     for (int i=0; i<10; ++i) {
@@ -50,6 +52,13 @@ void vector_test() {
 
     STD::vector<int>::iterator iter = vec.begin();
     vec.insert(iter+2, 1, 10);
+     for (auto i : vec) {
+        std::cout << i << " ";
+    }
+    std::cout << std::endl;
+
+    iter = vec.begin();
+    vec.erase(iter, iter+2);
      for (auto i : vec) {
         std::cout << i << " ";
     }

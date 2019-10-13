@@ -190,23 +190,16 @@ public:
         return first;
     }
     
-    void resize(size_type new_size, const T& x) 
-    {
+    void resize(size_type new_size, const T& x) {
         if (new_size < size()) 
             erase(begin() + new_size, end());
         else
             insert(end(), new_size - size(), x);
     }
     
-    void resize(size_type new_size) 
-    { 
-        resize(new_size, T()); 
-    }
+    void resize(size_type new_size) { resize(new_size, T()); }
 
-    void clear() 
-    {
-        erase(begin(), end());
-    }
+    void clear() { erase(begin(), end()); }
 
 protected:
     iterator allocate_and_fill(size_type n, const T& x) {
