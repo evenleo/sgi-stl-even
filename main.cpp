@@ -11,6 +11,7 @@
 #include "stl_uninitialized.h"
 #include "stl_vector.h"
 #include "stl_list.h"
+#include "stl_bvector.h"
 
 // #include <vecotor_sgi>
 
