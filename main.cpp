@@ -35,7 +35,7 @@ struct MM {
 
 void vector_test2() {
     STD::vector<MM> vec(2, MM(22));
-     for (auto i : vec) {
+    for (auto i : vec) {
         std::cout << i.val << " ";
     }
     std::cout << std::endl;
@@ -53,23 +53,33 @@ void vector_test() {
 
     STD::vector<int>::iterator iter = vec.begin();
     vec.insert(iter+2, 1, 10);
-     for (auto i : vec) {
+    for (auto i : vec) {
         std::cout << i << " ";
     }
     std::cout << std::endl;
 
     iter = vec.begin();
     vec.erase(iter, iter+2);
-     for (auto i : vec) {
+    for (auto i : vec) {
         std::cout << i << " ";
     }
     std::cout << std::endl;
+}
 
+void bit_vector_test() {
+    STD::vector<bool> vec;
+    vec.push_back(true);
+    vec.push_back(false);
+    for (auto i : vec) {
+        std::cout << i << " ";
+    }
+    std::cout << std::endl;
 }
 
 int main()
 {
-    vector_test();
+    bit_vector_test();
+
     system("pause");
     return 0;
 }
