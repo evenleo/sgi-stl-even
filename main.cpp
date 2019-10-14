@@ -67,6 +67,7 @@ void vector_test() {
 }
 
 void bit_vector_test() {
+    std::cout << "sizeof(bool):" << sizeof(bool) << std::endl;
     STD::vector<bool> vec;
     vec.push_back(true);
     vec.push_back(false);
@@ -76,9 +77,17 @@ void bit_vector_test() {
     std::cout << std::endl;
 }
 
+void bool_ptr_test() {
+    bool arr[10];
+    bool *p = arr;
+    bool *p2 = p++;
+
+}
+
 int main()
 {
     bit_vector_test();
+    // bool_ptr_test();
 
     system("pause");
     return 0;
