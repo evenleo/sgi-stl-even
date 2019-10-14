@@ -468,6 +468,8 @@ public:
   void clear() { erase(begin(), end()); }
 };
 
+typedef vector<bool, alloc> bit_vector;
+
 __STL_END_NAMESPACE 
 
 #endif 
