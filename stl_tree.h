@@ -453,7 +453,7 @@ public:
   typedef reverse_bidirectional_iterator<const_iterator, value_type,
                                          const_reference, difference_type>
           const_reverse_iterator;
-#endif /* __STL_CLASS_PARTIAL_SPECIALIZATION */ 
+#endif
 private:
   iterator __insert(base_ptr x, base_ptr y, const value_type& v);
   link_type __copy(link_type x, link_type p);
@@ -467,7 +467,6 @@ private:
     rightmost() = header;
   }
 public:
-                                // allocation/deallocation
   rb_tree(const Compare& comp = Compare())
     : node_count(0), key_compare(comp) { init(); }
 
