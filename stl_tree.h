@@ -443,17 +443,9 @@ public:
   typedef __rb_tree_iterator<value_type, const_reference, const_pointer> 
           const_iterator;
 
-#ifdef __STL_CLASS_PARTIAL_SPECIALIZATION
   typedef reverse_iterator<const_iterator> const_reverse_iterator;
   typedef reverse_iterator<iterator> reverse_iterator;
-#else /* __STL_CLASS_PARTIAL_SPECIALIZATION */
-  typedef reverse_bidirectional_iterator<iterator, value_type, reference,
-                                         difference_type>
-          reverse_iterator; 
-  typedef reverse_bidirectional_iterator<const_iterator, value_type,
-                                         const_reference, difference_type>
-          const_reverse_iterator;
-#endif
+
 private:
   iterator __insert(base_ptr x, base_ptr y, const value_type& v);
   link_type __copy(link_type x, link_type p);
@@ -530,17 +522,10 @@ public:
   iterator insert_unique(iterator position, const value_type& x);
   iterator insert_equal(iterator position, const value_type& x);
 
-#ifdef __STL_MEMBER_TEMPLATES  
   template <class InputIterator>
   void insert_unique(InputIterator first, InputIterator last);
   template <class InputIterator>
   void insert_equal(InputIterator first, InputIterator last);
-#else /* __STL_MEMBER_TEMPLATES */
-  void insert_unique(const_iterator first, const_iterator last);
-  void insert_unique(const value_type* first, const value_type* last);
-  void insert_equal(const_iterator first, const_iterator last);
-  void insert_equal(const value_type* first, const value_type* last);
-#endif /* __STL_MEMBER_TEMPLATES */
 
   void erase(iterator position);
   size_type erase(const key_type& x);
@@ -750,8 +735,6 @@ rb_tree<Key, Val, KeyOfValue, Compare, Alloc>::insert_equal(iterator position,
   }
 }
 
-#ifdef __STL_MEMBER_TEMPLATES  
-
 template <class K, class V, class KoV, class Cmp, class Al> template<class II>
 void rb_tree<K, V, KoV, Cmp, Al>::insert_equal(II first, II last) {
   for ( ; first != last; ++first)
@@ -764,40 +747,6 @@ void rb_tree<K, V, KoV, Cmp, Al>::insert_unique(II first, II last) {
     insert_unique(*first);
 }
 
-#else /* __STL_MEMBER_TEMPLATES */
-
-template <class K, class V, class KoV, class Cmp, class Al>
-void
-rb_tree<K, V, KoV, Cmp, Al>::insert_equal(const V* first, const V* last) {
-  for ( ; first != last; ++first)
-    insert_equal(*first);
-}
-
-template <class K, class V, class KoV, class Cmp, class Al>
-void
-rb_tree<K, V, KoV, Cmp, Al>::insert_equal(const_iterator first,
-                                          const_iterator last) {
-  for ( ; first != last; ++first)
-    insert_equal(*first);
-}
-
-template <class K, class V, class KoV, class Cmp, class A>
-void 
-rb_tree<K, V, KoV, Cmp, A>::insert_unique(const V* first, const V* last) {
-  for ( ; first != last; ++first)
-    insert_unique(*first);
-}
-
-template <class K, class V, class KoV, class Cmp, class A>
-void 
-rb_tree<K, V, KoV, Cmp, A>::insert_unique(const_iterator first,
-                                          const_iterator last) {
-  for ( ; first != last; ++first)
-    insert_unique(*first);
-}
-
-#endif /* __STL_MEMBER_TEMPLATES */
-         
 template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 inline void
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase(iterator position) {
@@ -1039,8 +988,4 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::__rb_verify() const
 
 __STL_END_NAMESPACE 
 
-#endif /* __SGI_STL_INTERNAL_TREE_H */
-
-// Local Variables:
-// mode:C++
-// End:
+#endif 
