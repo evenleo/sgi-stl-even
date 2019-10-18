@@ -43,14 +43,15 @@ struct __rb_tree_node : public __rb_tree_node_base
   Value value_field;  //节点值
 };
 
-
+//基层接迭代器
 struct __rb_tree_base_iterator
 {
   typedef __rb_tree_node_base::base_ptr base_ptr;
   typedef bidirectional_iterator_tag iterator_category;
   typedef ptrdiff_t difference_type;
-  base_ptr node;
-
+  base_ptr node;  //它用来和容器之间产生一个连结关系
+  
+  //前进只用于operator++内，再无他出调用
   void increment()
   {
     if (node->right != 0) {        //如果有右子节点，下面操作
@@ -64,33 +65,37 @@ struct __rb_tree_base_iterator
         node = y;                  //继续上溯，直到不为右子节点为止
         y = y->parent;
       }
-      if (node->right != y)        //若此时的右子节点不等于此时的父亲节点
-        node = y;                  //此时的父亲节点即为答案，
+      if (node->right != y)        //若此时的右子节点不等于父亲节点
+        node = y;                  //父亲节点即为答案，
     }
   }
 
+  //前进只用于operator--内，再无他出调用
   void decrement()
   {
-    if (node->color == __rb_tree_red &&
-        node->parent->parent == node)
-      node = node->right;
-    else if (node->left != 0) {
-      base_ptr y = node->left;
+    if (node->color == __rb_tree_red &&  //如果是红且
+        node->parent->parent == node)    //父节点的父节点等于自己
+      node = node->right;                //右节点即为解答
+      //以上情况发生于node为header时(即node为end())
+      //header右子节点即mostright，指向整棵树max节点
+    else if (node->left != 0) {          //存在左子节点
+      base_ptr y = node->left;           //去左子树最大值
       while (y->right != 0)
         y = y->right;
       node = y;
     }
-    else {
-      base_ptr y = node->parent;
-      while (node == y->left) {
-        node = y;
+    else {                              //左子节点不存在
+      base_ptr y = node->parent;        //取父节点
+      while (node == y->left) {         //如果node是左子节点  
+        node = y;                       //继续上溯，直到不为左子节点为止
         y = y->parent;
       }
-      node = y;
+      node = y;                         //此时y即为解答
     }
   }
 };
 
+//RB-tree正规迭代器
 template <class Value, class Ref, class Ptr>
 struct __rb_tree_iterator : public __rb_tree_base_iterator
 {
@@ -109,7 +114,7 @@ struct __rb_tree_iterator : public __rb_tree_base_iterator
   reference operator*() const { return link_type(node)->value_field; }
 #ifndef __SGI_STL_NO_ARROW_OPERATOR
   pointer operator->() const { return &(operator*()); }
-#endif /* __SGI_STL_NO_ARROW_OPERATOR */
+#endif 
 
   self& operator++() { increment(); return *this; }
   self operator++(int) {
