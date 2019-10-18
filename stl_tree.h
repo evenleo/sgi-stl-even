@@ -9,37 +9,38 @@
 __STL_BEGIN_NAMESPACE 
 
 typedef bool __rb_tree_color_type;
-const __rb_tree_color_type __rb_tree_red = false;
-const __rb_tree_color_type __rb_tree_black = true;
+const __rb_tree_color_type __rb_tree_red = false;    //红色为0
+const __rb_tree_color_type __rb_tree_black = true;   //黑色为1
 
 struct __rb_tree_node_base
 {
   typedef __rb_tree_color_type color_type;
   typedef __rb_tree_node_base* base_ptr;
 
-  color_type color; 
-  base_ptr parent;
-  base_ptr left;
-  base_ptr right;
+  color_type color;  //节点颜色，非红即黑
+  base_ptr parent;   //RB树的许多操作必须知道父节点
+  base_ptr left;     //指向左节点
+  base_ptr right;    //指向右节点
 
   static base_ptr minimum(base_ptr x)
   {
-    while (x->left != 0) x = x->left;
-    return x;
+    while (x->left != 0) x = x->left;  //一直向左走，就会找到最小值
+    return x;                          //这是二叉搜索树的特性
   }
 
   static base_ptr maximum(base_ptr x)
   {
-    while (x->right != 0) x = x->right;
-    return x;
+    while (x->right != 0) x = x->right;  //一直向右走，就会找到最大值
+    return x;                            //这是二叉搜索树的特性
   }
 };
 
+//真正的节点定义，基类中不含模板参数
 template <class Value>
 struct __rb_tree_node : public __rb_tree_node_base
 {
   typedef __rb_tree_node<Value>* link_type;
-  Value value_field;
+  Value value_field;  //节点值
 };
 
 
@@ -52,19 +53,19 @@ struct __rb_tree_base_iterator
 
   void increment()
   {
-    if (node->right != 0) {
-      node = node->right;
+    if (node->right != 0) {        //如果有右子节点，下面操作
+      node = node->right;          //使node取得右子树最小值
       while (node->left != 0)
         node = node->left;
     }
-    else {
-      base_ptr y = node->parent;
-      while (node == y->right) {
-        node = y;
+    else {                         //没有右子节点      
+      base_ptr y = node->parent;   //取父节点
+      while (node == y->right) {   //如果node是右子节点
+        node = y;                  //继续上溯，直到不为右子节点为止
         y = y->parent;
       }
-      if (node->right != y)
-        node = y;
+      if (node->right != y)        //若此时的右子节点不等于此时的父亲节点
+        node = y;                  //此时的父亲节点即为答案，
     }
   }
 
