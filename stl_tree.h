@@ -197,17 +197,17 @@ inline void
 __rb_tree_rebalance(__rb_tree_node_base* x, __rb_tree_node_base*& root)
 {   //此函数只在插入元素时调用
   x->color = __rb_tree_red;  //新节点必为红
-  while (x != root && x->parent->color == __rb_tree_red) {
-    if (x->parent == x->parent->parent->left) {
-      __rb_tree_node_base* y = x->parent->parent->right;
-      if (y && y->color == __rb_tree_red) {
-        x->parent->color = __rb_tree_black;
-        y->color = __rb_tree_black;
-        x->parent->parent->color = __rb_tree_red;
-        x = x->parent->parent;
+  while (x != root && x->parent->color == __rb_tree_red) {//当x不为根节点且x父节点为红
+    if (x->parent == x->parent->parent->left) {           //x父节点为左节点
+      __rb_tree_node_base* y = x->parent->parent->right;  //取x祖父节点的右子节点
+      if (y && y->color == __rb_tree_red) {               //y存在且为红
+        x->parent->color = __rb_tree_black;               //x父节点改为黑
+        y->color = __rb_tree_black;                       //y改为黑
+        x->parent->parent->color = __rb_tree_red;         //x祖父节点改为红，原来必为黑
+        x = x->parent->parent;                            //需要调整的x变为祖父节点
       }
-      else {
-        if (x == x->parent->right) {
+      else {                                              //y不存在或为黑
+        if (x == x->parent->right) {                      //x为右节点
           x = x->parent;
           __rb_tree_rotate_left(x, root);
         }
