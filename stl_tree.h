@@ -203,26 +203,26 @@ inline void
 __rb_tree_rebalance(__rb_tree_node_base* x, __rb_tree_node_base*& root)
 {   //此函数只在插入元素时调用
   x->color = __rb_tree_red;  //新节点必为红
-  while (x != root && x->parent->color == __rb_tree_red) {//当x不为根节点且x父节点为红
+  while (x != root && x->parent->color == __rb_tree_red) {//当x不为根节点且x父节点为红，则祖父节点肯定为黑
     if (x->parent == x->parent->parent->left) {           //x父节点为左节点
       __rb_tree_node_base* y = x->parent->parent->right;  //取x祖父节点的右子节点
       if (y && y->color == __rb_tree_red) {               //y存在且为红
         x->parent->color = __rb_tree_black;               //x父节点改为黑
         y->color = __rb_tree_black;                       //y改为黑
         x->parent->parent->color = __rb_tree_red;         //x祖父节点改为红，原来必为黑
-        x = x->parent->parent;                            //需要调整的x变为祖父节点
+        x = x->parent->parent;                            //需要调整的x置为祖父节点
       }
-      else {                                              //y不存在或为黑
+      else {                                              //y不存在或为黑，
         if (x == x->parent->right) {                      //x为右节点
-          x = x->parent;
-          __rb_tree_rotate_left(x, root);
+          x = x->parent;                                  
+          __rb_tree_rotate_left(x, root);                 //父节点左旋               
         }
         x->parent->color = __rb_tree_black;
         x->parent->parent->color = __rb_tree_red;
-        __rb_tree_rotate_right(x->parent->parent, root);
+        __rb_tree_rotate_right(x->parent->parent, root);  //祖父节点右旋
       }
     }
-    else {
+    else {  //x父节点为右节点，与上面分析
       __rb_tree_node_base* y = x->parent->parent->left;
       if (y && y->color == __rb_tree_red) {
         x->parent->color = __rb_tree_black;
@@ -464,7 +464,7 @@ private:
   void init() {
     header = get_node();           //产生一个节点空间
     color(header) = __rb_tree_red; //令header为红，用来区分header和
-                                   // root, 在iterator.operator--
+                                   //root, 在iterator.operator--
     root() = 0;
     leftmost() = header;           //令header左子节点为自己
     rightmost() = header;          //令header右子节点为自己
