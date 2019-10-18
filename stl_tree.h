@@ -157,22 +157,23 @@ inline Value* value_type(const __rb_tree_iterator<Value, Ref, Ptr>&) {
 inline void 
 __rb_tree_rotate_left(__rb_tree_node_base* x, __rb_tree_node_base*& root)
 {
-  __rb_tree_node_base* y = x->right;
-  x->right = y->left;
-  if (y->left !=0)
-    y->left->parent = x;
-  y->parent = x->parent;
+  __rb_tree_node_base* y = x->right;  //取x右节点
+  x->right = y->left;                 //x右指针指向y左节点
+  if (y->left !=0)                    //y左节点存在
+    y->left->parent = x;              //其父指针指向x，回马枪
+  y->parent = x->parent;              //y父指针指向x父亲节点
 
-  if (x == root)
-    root = y;
-  else if (x == x->parent->left)
-    x->parent->left = y;
-  else
-    x->parent->right = y;
-  y->left = x;
-  x->parent = y;
+  if (x == root)                      //当x为根节点时
+    root = y;                         //根节点赋为y
+  else if (x == x->parent->left)      //x为左子节点
+    x->parent->left = y;              //x父节点左指针指向y
+  else                                //x为右子节点
+    x->parent->right = y;             //x父节点右指针指向y
+  y->left = x;                        //y左指针指向x
+  x->parent = y;                      //x父指针指向y，回马枪
 }
 
+//原理和左旋一样，只方向全部逆转，不再注解
 inline void 
 __rb_tree_rotate_right(__rb_tree_node_base* x, __rb_tree_node_base*& root)
 {
@@ -194,8 +195,8 @@ __rb_tree_rotate_right(__rb_tree_node_base* x, __rb_tree_node_base*& root)
 
 inline void 
 __rb_tree_rebalance(__rb_tree_node_base* x, __rb_tree_node_base*& root)
-{
-  x->color = __rb_tree_red;
+{   //此函数只在插入元素时调用
+  x->color = __rb_tree_red;  //新节点必为红
   while (x != root && x->parent->color == __rb_tree_red) {
     if (x->parent == x->parent->parent->left) {
       __rb_tree_node_base* y = x->parent->parent->right;
@@ -370,9 +371,10 @@ protected:
   typedef void* void_pointer;
   typedef __rb_tree_node_base* base_ptr;
   typedef __rb_tree_node<Value> rb_tree_node;
-  typedef simple_alloc<rb_tree_node, Alloc> rb_tree_node_allocator;
+  typedef simple_alloc<rb_tree_node, Alloc> rb_tree_node_allocator; //专属空间配置器
   typedef __rb_tree_color_type color_type;
 public:
+  //iterator定义在后面
   typedef Key key_type;
   typedef Value value_type;
   typedef value_type* pointer;
@@ -387,15 +389,15 @@ protected:
   void put_node(link_type p) { rb_tree_node_allocator::deallocate(p); }
 
   link_type create_node(const value_type& x) {
-    link_type tmp = get_node();
+    link_type tmp = get_node();        //配置空间
     __STL_TRY {
-      construct(&tmp->value_field, x);
+      construct(&tmp->value_field, x); //构造内容
     }
     __STL_UNWIND(put_node(tmp));
     return tmp;
   }
 
-  link_type clone_node(link_type x) {
+  link_type clone_node(link_type x) {  //复制一个节点(值和色)
     link_type tmp = create_node(x->value_field);
     tmp->color = x->color;
     tmp->left = 0;
@@ -404,31 +406,34 @@ protected:
   }
 
   void destroy_node(link_type p) {
-    destroy(&p->value_field);
-    put_node(p);
+    destroy(&p->value_field);  //释放内容
+    put_node(p);               //释放内存
   }
 
 protected:
-  size_type node_count; // keeps track of size of tree
-  link_type header;  
-  Compare key_compare;
+  size_type node_count; //追踪记录树的大小(节点数量)
+  link_type header;     //这是实现上的一个技巧
+  Compare key_compare;  //节点间键值大小比较准则，应该是个function object
 
+  //以下三个函数用来方便取得header的成员
   link_type& root() const { return (link_type&) header->parent; }
   link_type& leftmost() const { return (link_type&) header->left; }
   link_type& rightmost() const { return (link_type&) header->right; }
 
+  //以下六个函数用来方便取得节点x的成员
   static link_type& left(link_type x) { return (link_type&)(x->left); }
   static link_type& right(link_type x) { return (link_type&)(x->right); }
   static link_type& parent(link_type x) { return (link_type&)(x->parent); }
   static reference value(link_type x) { return x->value_field; }
   static const Key& key(link_type x) { return KeyOfValue()(value(x)); }
   static color_type& color(link_type x) { return (color_type&)(x->color); }
-
+  
+  //以下六个函数用来方便取得节点x的成员
   static link_type& left(base_ptr x) { return (link_type&)(x->left); }
   static link_type& right(base_ptr x) { return (link_type&)(x->right); }
   static link_type& parent(base_ptr x) { return (link_type&)(x->parent); }
   static reference value(base_ptr x) { return ((link_type)x)->value_field; }
-  static const Key& key(base_ptr x) { return KeyOfValue()(value(link_type(x)));} 
+  static const Key& key(base_ptr x) { return KeyOfValue()(value(link_type(x))); } 
   static color_type& color(base_ptr x) { return (color_type&)(link_type(x)->color); }
 
   static link_type minimum(link_type x) { 
@@ -451,34 +456,34 @@ private:
   link_type __copy(link_type x, link_type p);
   void __erase(link_type x);
   void init() {
-    header = get_node();
-    color(header) = __rb_tree_red; // used to distinguish header from 
-                                   // root, in iterator.operator++
+    header = get_node();           //产生一个节点空间
+    color(header) = __rb_tree_red; //令header为红，用来区分header和
+                                   // root, 在iterator.operator--
     root() = 0;
-    leftmost() = header;
-    rightmost() = header;
+    leftmost() = header;           //令header左子节点为自己
+    rightmost() = header;          //令header右子节点为自己
   }
 public:
-  rb_tree(const Compare& comp = Compare())
+  rb_tree(const Compare& comp = Compare())  //默认构造调init
     : node_count(0), key_compare(comp) { init(); }
 
   rb_tree(const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& x) 
-    : node_count(0), key_compare(x.key_compare)
+    : node_count(0), key_compare(x.key_compare)  //拷贝构造
   { 
     header = get_node();
     color(header) = __rb_tree_red;
-    if (x.root() == 0) {
+    if (x.root() == 0) {  //x根节点为空，整个过程其实和init一样
       root() = 0;
       leftmost() = header;
       rightmost() = header;
     }
-    else {
+    else { //存在x根节点
       __STL_TRY {
-        root() = __copy(x.root(), header);
+        root() = __copy(x.root(), header);  //调用全局复制函数
       }
       __STL_UNWIND(put_node(header));
-      leftmost() = minimum(root());
-      rightmost() = maximum(root());
+      leftmost() = minimum(root());         //header左指针指向的最小值点
+      rightmost() = maximum(root());        //header右指针指向的最大值点
     }
     node_count = x.node_count;
   }
@@ -492,8 +497,8 @@ public:
 public:    
                                 // accessors:
   Compare key_comp() const { return key_compare; }
-  iterator begin() { return leftmost(); }
-  const_iterator begin() const { return leftmost(); }
+  iterator begin() { return leftmost(); }               //RB-tree起头为最左节点处
+  const_iterator begin() const { return leftmost(); }   //RB-tree终点为header所指处
   iterator end() { return header; }
   const_iterator end() const { return header; }
   reverse_iterator rbegin() { return reverse_iterator(end()); }
@@ -533,8 +538,8 @@ public:
   void erase(const key_type* first, const key_type* last);
   void clear() {
     if (node_count != 0) {
-      __erase(root());
-      leftmost() = header;
+      __erase(root());      //释放所有节点
+      leftmost() = header;  
       root() = 0;
       rightmost() = header;
       node_count = 0;
@@ -578,7 +583,7 @@ inline void swap(rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& x,
   x.swap(y);
 }
 
-#endif /* __STL_FUNCTION_TMPL_PARTIAL_ORDER */
+#endif 
 
 
 template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
