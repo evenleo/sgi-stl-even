@@ -620,30 +620,32 @@ template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 typename rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
 rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::
 __insert(base_ptr x_, base_ptr y_, const Value& v) {
+  //x_为新值插入点，y_为插入点父节点，参数v为新值
   link_type x = (link_type) x_;
   link_type y = (link_type) y_;
   link_type z;
 
   if (y == header || x != 0 || key_compare(KeyOfValue()(v), key(y))) {
-    z = create_node(v);
-    left(y) = z;                // also makes leftmost() = z when y == header
-    if (y == header) {
+    //y为header或x!=0或v小于父节点
+    z = create_node(v);         //产生一个新节点
+    left(y) = z;                //also makes leftmost() = z when y == header
+    if (y == header) {          
       root() = z;
       rightmost() = z;
     }
-    else if (y == leftmost())
-      leftmost() = z;           // maintain leftmost() pointing to min node
+    else if (y == leftmost())   //如果y为最左节点
+      leftmost() = z;           //maintain leftmost() pointing to min node
   }
   else {
-    z = create_node(v);
-    right(y) = z;
-    if (y == rightmost())
-      rightmost() = z;          // maintain rightmost() pointing to max node
+    z = create_node(v);         //产生一个新节点
+    right(y) = z;               //令新节点称为y的右子节点
+    if (y == rightmost())       //如果y为最右节点
+      rightmost() = z;          //maintain rightmost() pointing to max node
   }
   parent(z) = y;
   left(z) = 0;
   right(z) = 0;
-  __rb_tree_rebalance(z, header->parent);
+  __rb_tree_rebalance(z, header->parent);  //树调整
   ++node_count;
   return iterator(z);
 }
