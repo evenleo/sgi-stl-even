@@ -260,7 +260,7 @@ public:
     void reverse();
     void sort();
 
-    friend bool operator==(const list& x, const list& y);
+    friend bool operator==__STL_NULL_TMPL_ARGS(const list& x, const list& y);
 };
 
 template<class T, class Alloc>
