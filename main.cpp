@@ -14,13 +14,15 @@
 #include "stl_bvector.h"
 #include "stl_function.h"
 #include "stl_tree.h"
+#include "stl_slist.h"
 
 // #include <vecotor_sgi>
 
 void list_test() {
     STD::list<int> list;
     for (int i=0; i<10; ++i) {
-        list.push_back(i);
+        int r = rand() % 10;
+        list.push_back(r);
     }
     
     STD::list<int>::iterator iter = list.begin();
@@ -28,6 +30,15 @@ void list_test() {
         std::cout << *iter << " ";
     }
     std::cout << std::endl;
+    
+    list.sort();
+    iter = list.begin();
+    for ( ; iter != list.end(); ++iter) {
+        std::cout << *iter << " ";
+    }
+    std::cout << std::endl;
+
+
 }
 
 struct MM {
@@ -118,26 +129,31 @@ void stl_tree_test() {
         std::cout << *it << "(" << rbtite.node->color << ") ";
     }
     std::cout << std::endl;
-
-
 }
 
-void bool_ptr_test() {
-    bool arr[10];
-    bool *p = arr;
-    bool *p2 = p++;
+void slist_test() {
+    STD::slist<int> sl;
+    sl.push_front(1);
+    sl.push_front(2);
+    sl.push_front(3);
+    for (auto it = sl.begin(); it != sl.end(); ++it) {
+        std::cout << *it << " ";
+    }
+    std::cout << std::endl;
 
+    STD::slist<int>::iterator it = sl.begin();
+    ++it;
+    sl.insert_after(it, 4);
+
+    for (auto it = sl.begin(); it != sl.end(); ++it) {
+        std::cout << *it << " ";
+    }
+    std::cout << std::endl;
 }
 
 int main()
 {
-    STD::less<int> key_compare;
-    bool r1 = key_compare(2, 3);
-    bool r2 = key_compare(3, 3);
-    bool r3 = key_compare(4, 3);
-
-
-    // stl_tree_test();
+    list_test();
 
     system("pause");
     return 0;

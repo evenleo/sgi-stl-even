@@ -161,7 +161,7 @@ public:
      const_reverse_iterator rend() const {
         return const_reverse_iterator(begin());
     }
-    bool empty() const { return node->next = node; }
+    bool empty() const { return node->next == node; }
     size_type size() const {
         size_type result = 0;
         distance(begin(), end(), result);
@@ -249,6 +249,12 @@ public:
     void splice(iterator position, list& x) {
         if (!x.empty())
             transfer(position, x.begin(), x.end());
+    }
+    void splice(iterator position, list&, iterator i) {
+        iterator j = i;
+        ++j;
+        if (position == i || position == j) return;
+        transfer(position, i, j);
     }
     void splice(iterator position, list&, iterator first, iterator last) {
         if (first != last)
@@ -383,7 +389,22 @@ void list<T, Alloc>::reverse() {
 template<class T, class Alloc>
 void list<T, Alloc>::sort() {
     if (node->next == node || link_type(node->next)->next == node) return;
-    
+    list<T, Alloc> carry;
+    list<T, Alloc> counter[64];
+    int fill = 0;
+    while (!empty()) {
+        carry.splice(carry.begin(), *this, begin());
+        int i = 0;
+        while (i < fill && !counter[i].empty()) {
+            counter[i].merge(carry);
+            carry.swap(counter[i++]);
+        }
+        carry.swap(counter[i]);
+        if (i == fill) ++fill;
+    }
+
+    for (int i = 1; i < fill; ++i) counter[i].merge(counter[i-1]);
+    swap(counter[fill-1]);
 }
 
 
