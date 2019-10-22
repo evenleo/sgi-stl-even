@@ -15,6 +15,7 @@
 #include "stl_function.h"
 #include "stl_tree.h"
 #include "stl_slist.h"
+#include "stl_set.h"
 
 /**************************list test*******************************/
 
@@ -189,9 +190,31 @@ void slist_test() {
     std::cout << std::endl;
 }
 
+void set_test() {
+    STD::set<int> iset;
+    for (int i = 0; i < 1000; ++i) {
+        int r = rand() % 100;
+        iset.insert(r);
+    }
+    for (auto it = iset.begin(); it != iset.end(); ++it) {
+        std::cout << *it << " ";
+    }
+    std::cout << std::endl;
+
+    int targert = 9;
+    auto it = iset.find(targert);
+    if (it != iset.end()) {
+        std::cout << "found " << targert << std::endl;
+    } else {
+        std::cout << "not found " << targert << std::endl;
+    }
+    size_t cnt = iset.count(targert);
+    std::cout << targert << " has " << cnt << std::endl;
+}
+
 int main()
 {
-    list_test();
+    set_test();
 
     system("pause");
     return 0;

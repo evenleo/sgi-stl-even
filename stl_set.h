@@ -1,9 +1,6 @@
 #ifndef __SGI_STL_INTERNAL_SET_H
 #define __SGI_STL_INTERNAL_SET_H
 
-#include "stl_tree.h"
-#include "stl_function.h"
-
 __STL_BEGIN_NAMESPACE
 
 template <class Key, class Compare = less<Key>, class Alloc = alloc>
