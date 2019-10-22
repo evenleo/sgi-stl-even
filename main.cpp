@@ -17,6 +17,7 @@
 #include "stl_slist.h"
 #include "stl_set.h"
 #include "stl_multiset.h"
+#include "stl_hashtable.h"
 
 /**************************list test*******************************/
 
