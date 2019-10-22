@@ -16,7 +16,43 @@
 #include "stl_tree.h"
 #include "stl_slist.h"
 
-// #include <vecotor_sgi>
+/**************************list test*******************************/
+
+template<class T>
+void print(const STD::list<T>& list) { //打印链表
+    for (auto it = list.begin(); it != list.end(); ++it) {
+        std::cout << *it << " ";
+    }
+    std::cout << std::endl;
+}
+
+template<class T>
+void sort(STD::list<T>& list) {
+    if (list.size() <= 1) return;
+    STD::list<T> carry;
+    STD::list<T> counter[64];
+    int fill = 0;
+    while (!list.empty()) {
+        carry.splice(carry.begin(), list, list.begin());
+        int i = 0;
+        while (i < fill && !counter[i].empty()) {
+            counter[i].merge(carry);
+            carry.swap(counter[i++]);
+        }
+        carry.swap(counter[i]);
+        if (i == fill) ++fill;
+        
+        //打印本次循环的所有递归层次内容
+        std::cout << "---------test------------------" << std::endl;
+        for (int i = 0; i < fill; ++i) {
+            std::cout << "counter[" << i << "]: ";
+            print(counter[i]);
+        }
+    }
+
+    for (int i = 1; i < fill; ++i) counter[i].merge(counter[i-1]);
+    list.swap(counter[fill-1]);
+}
 
 void list_test() {
     STD::list<int> list;
@@ -30,16 +66,18 @@ void list_test() {
         std::cout << *iter << " ";
     }
     std::cout << std::endl;
-    
-    list.sort();
+    std::cout << "begin sort:" << std::endl;
+    sort(list);
+    std::cout << "after sort:" << std::endl;
     iter = list.begin();
     for ( ; iter != list.end(); ++iter) {
         std::cout << *iter << " ";
     }
     std::cout << std::endl;
-
-
 }
+
+/**************************list test*******************************/
+
 
 struct MM {
     int val;

@@ -389,20 +389,21 @@ void list<T, Alloc>::reverse() {
 template<class T, class Alloc>
 void list<T, Alloc>::sort() {
     if (node->next == node || link_type(node->next)->next == node) return;
-    list<T, Alloc> carry;
-    list<T, Alloc> counter[64];
+    list<T, Alloc> carry;       //辅助链表，相当与tmp
+    list<T, Alloc> counter[64]; //保存当前递归层次的结果，第i链表保存的元素个数为2的i次方或0
     int fill = 0;
     while (!empty()) {
-        carry.splice(carry.begin(), *this, begin());
+        carry.splice(carry.begin(), *this, begin());  //将链表的第一个元素移动至carry开头
         int i = 0;
+        //从小到大不断合并非空归并层次直至遇到空层或者到达当前最大归并层次
         while (i < fill && !counter[i].empty()) {
-            counter[i].merge(carry);
-            carry.swap(counter[i++]);
+            counter[i].merge(carry);  //合并链表，结果链表是有序的，必须保证合并前两链表有序
+            carry.swap(counter[i++]); //链表元素互换
         }
-        carry.swap(counter[i]);
+        carry.swap(counter[i]);  //将carry元素放到counter[i]中，相当于将carry情况，带下一次循环使用
         if (i == fill) ++fill;
     }
-
+    //将所有归并层次的结果合并得到最终结果counter[fill-1]
     for (int i = 1; i < fill; ++i) counter[i].merge(counter[i-1]);
     swap(counter[fill-1]);
 }
