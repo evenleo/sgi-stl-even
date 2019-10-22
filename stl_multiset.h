@@ -54,10 +54,8 @@ public:
   size_type max_size() const { return t.max_size(); }
   void swap(multiset<Key, Compare, Alloc>& x) { t.swap(x.t); }
 
-  typedef pair<iterator, bool> pair_iterator_bool;
-  pair<iterator, bool> insert(const value_type& x) {
-    pair<typename rep_type::iterator, bool> p = t.insert_equal(x);
-    return pair<iterator, bool>(p.first, p.second);
+  iterator insert(const value_type& x) {
+      return t.insert_equal(x);
   }
   iterator insert(iterator position, const value_type& x) {
     typedef typename rep_type::iterator rep_iterator;
