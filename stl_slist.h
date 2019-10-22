@@ -378,8 +378,6 @@ public:
   void clear() { erase_after(&head, 0); }
 
 public:
-  // Moves the range [before_first + 1, before_last + 1) to *this,
-  //  inserting it immediately after pos.  This is constant time.
   void splice_after(iterator pos, 
                     iterator before_first, iterator before_last)
   {
@@ -387,15 +385,11 @@ public:
       __slist_splice_after(pos.node, before_first.node, before_last.node);
   }
 
-  // Moves the element that follows prev to *this, inserting it immediately
-  //  after pos.  This is constant time.
   void splice_after(iterator pos, iterator prev)
   {
     __slist_splice_after(pos.node, prev.node, prev.node->next);
   }
 
-
-  // Linear in distance(begin(), pos), and linear in L.size().
   void splice(iterator pos, slist& L) {
     if (L.head.next)
       __slist_splice_after(__slist_previous(&head, pos.node),
@@ -403,15 +397,12 @@ public:
                            __slist_previous(&L.head, 0));
   }
 
-  // Linear in distance(begin(), pos), and in distance(L.begin(), i).
   void splice(iterator pos, slist& L, iterator i) {
     __slist_splice_after(__slist_previous(&head, pos.node),
                          __slist_previous(&L.head, i.node),
                          i.node);
   }
 
-  // Linear in distance(begin(), pos), in distance(L.begin(), first),
-  // and in distance(first, last).
   void splice(iterator pos, slist& L, iterator first, iterator last)
   {
     if (first != last)
