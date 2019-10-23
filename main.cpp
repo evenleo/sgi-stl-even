@@ -10,6 +10,7 @@
 #include "stl_algobase.h"
 #include "stl_algo.h"
 #include "stl_uninitialized.h"
+#include "stl_hash_fun.h"
 #include "stl_vector.h"
 #include "stl_list.h" 
 #include "stl_bvector.h"
@@ -82,7 +83,7 @@ void list_test() {
 
 /**************************list test*******************************/
 
-
+ 
 struct MM {
     int val;
     MM(int x) : val(x) {}
@@ -237,9 +238,32 @@ void multiset_test() {
     std::cout << targert << " has " << cnt << std::endl;
 }
 
+struct eqstr {
+    bool operator() (const char* a, const char* b) const {
+        return strcmp(a, b) == 0;
+    }
+};
+
+void hashtable_test() {
+    STD::hashtable<const char*, 
+                   const char*, 
+                   STD::hash<const char*>, 
+                   STD::identity<const char*>,
+                   eqstr, STD::alloc> 
+    ht(50, STD::hash<const char*>(), eqstr());
+    ht.insert_unique("hello");
+    ht.insert_unique("even");
+    ht.insert_unique("haha");
+    for (auto it = ht.begin(); it != ht.end(); ++it) {
+        std::cout << *it << " ";
+    }
+    std::cout << std::endl;
+
+}
+
 int main()
 {
-    multiset_test();
+    hashtable_test();
 
     system("pause");
     return 0;

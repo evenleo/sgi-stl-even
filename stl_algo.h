@@ -1,6 +1,8 @@
 #ifndef __SGI_STL_INTERNAL_ALGO_H
 #define __SGI_STL_INTERNAL_ALGO_H
 
+__STL_BEGIN_NAMESPACE
+
 template <class ForwardIterator, class T, class Distance>
 ForwardIterator __lower_bound(ForwardIterator first, ForwardIterator last, 
                               const T& value, Distance*,
@@ -85,7 +87,7 @@ RandomAccessIterator __lower_bound(RandomAccessIterator first, RandomAccessItera
     while (len > 0) {
         half = len >> 1;
         middle = first + half;
-        if (comp(*middle, value) {
+        if (comp(*middle, value)) {
             first = middle + 1;
             len = len - half - 1;
         } else 
@@ -103,6 +105,8 @@ inline ForwardIterator lower_bound(ForwardIterator first, ForwardIterator last,
 
 
 
+
+__STL_END_NAMESPACE
 
 
 

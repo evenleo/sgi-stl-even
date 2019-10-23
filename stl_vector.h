@@ -102,7 +102,7 @@ public:
 
     vector<T, Alloc>& operator=(const vector<T, Alloc>& x);
 
-    void reverve(size_type n) {
+    void reserve(size_type n) {
         if (capacity() < n) {
             const size_type old_size = size();
             iterator tmp = allocate_and_copy(n, start, finish);
