@@ -96,6 +96,20 @@ static const unsigned long __stl_prime_list[__stl_num_primes] =
   1610612741, 3221225473ul, 4294967291ul
 };
 
+inline unsigned long __stl_next_prime(unsigned long n) 
+{
+  const unsigned long* first = __stl_prime_list;
+  const unsigned long* last = __stl_prime_list + __stl_num_primes;
+  const unsigned long* pos = lower_bound(first, last, n);
+  return pos == last ? *(last - 1) : *pos;
+}
+
+template <class V, class K, class HF, class ExK, class Eqk, class All>
+inline hashtable<V, K, HF, ExK, EqK, All>::difference_type*
+distance_type(const __hashtable_iterator<V, K, HF, ExK, EqK, All>&)
+{
+  return (hashtable<V, K, HF, ExK, EqK, All>::difference_type*) 0;
+}
 
 
 __STL_END_NAMESPACE

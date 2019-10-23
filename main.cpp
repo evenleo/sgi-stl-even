@@ -8,6 +8,7 @@
 #include "stl_relops.h"
 #include "stl_pair.h"
 #include "stl_algobase.h"
+#include "stl_algo.h"
 #include "stl_uninitialized.h"
 #include "stl_vector.h"
 #include "stl_list.h" 
