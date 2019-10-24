@@ -439,51 +439,6 @@ __hashtable_const_iterator<V, K, HF, ExK, EqK, A>::operator++(int)
   return tmp;
 }
 
-#ifndef __STL_CLASS_PARTIAL_SPECIALIZATION
-
-// template <class V, class K, class HF, class ExK, class EqK, class All>
-// inline forward_iterator_tag
-// iterator_category(const __hashtable_iterator<V, K, HF, ExK, EqK, All>&)
-// {
-//   return forward_iterator_tag();
-// }
-
-// template <class V, class K, class HF, class ExK, class EqK, class All>
-// inline V* value_type(const __hashtable_iterator<V, K, HF, ExK, EqK, All>&)
-// {
-//   return (V*) 0;
-// }
-
-// template <class V, class K, class HF, class ExK, class EqK, class All>
-// inline hashtable<V, K, HF, ExK, EqK, All>::difference_type*
-// distance_type(const __hashtable_iterator<V, K, HF, ExK, EqK, All>&)
-// {
-//   return (hashtable<V, K, HF, ExK, EqK, All>::difference_type*) 0;
-// }
-
-// template <class V, class K, class HF, class ExK, class EqK, class All>
-// inline forward_iterator_tag
-// iterator_category(const __hashtable_const_iterator<V, K, HF, ExK, EqK, All>&)
-// {
-//   return forward_iterator_tag();
-// }
-
-// template <class V, class K, class HF, class ExK, class EqK, class All>
-// inline V* 
-// value_type(const __hashtable_const_iterator<V, K, HF, ExK, EqK, All>&)
-// {
-//   return (V*) 0;
-// }
-
-// template <class V, class K, class HF, class ExK, class EqK, class All>
-// inline hashtable<V, K, HF, ExK, EqK, All>::difference_type*
-// distance_type(const __hashtable_const_iterator<V, K, HF, ExK, EqK, All>&)
-// {
-//   return (hashtable<V, K, HF, ExK, EqK, All>::difference_type*) 0;
-// }
-
-#endif 
-
 template <class V, class K, class HF, class Ex, class Eq, class A>
 bool operator==(const hashtable<V, K, HF, Ex, Eq, A>& ht1,
                 const hashtable<V, K, HF, Ex, Eq, A>& ht2)
