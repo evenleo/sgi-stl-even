@@ -43,7 +43,7 @@ struct __hashtable_iterator {
     node* cur;
     hashtable* ht;
 
-    __hashtable_iterator(node* n, hashtable* tab) : cur(n), ht(tab) {}
+    __hashtable_iterator(node* n, hashtable* tab) : cur(n), ht(tab) {}  //迭代器构造函数，源码都调用这个
     __hashtable_iterator() {}
     reference operator*() const { return cur->val; }
     pointer operator->() const { return &(operator*()); }
@@ -96,11 +96,11 @@ static const unsigned long __stl_prime_list[__stl_num_primes] =
   1610612741, 3221225473ul, 4294967291ul
 };
 
-inline unsigned long __stl_next_prime(unsigned long n) 
+inline unsigned long __stl_next_prime(unsigned long n)    //找出上述28个质数之中，最接近并大于n的那个质数，如找不到则返回数值中最大质数
 {
   const unsigned long* first = __stl_prime_list;
   const unsigned long* last = __stl_prime_list + __stl_num_primes;
-  const unsigned long* pos = lower_bound(first, last, n);
+  const unsigned long* pos = lower_bound(first, last, n); //返回[first, last) 中首个不小于（即大于或等于）n 的质数指针
   return pos == last ? *(last - 1) : *pos;
 }
 
@@ -212,12 +212,12 @@ friend bool
 
 public:
 
-  size_type bucket_count() const { return buckets.size(); }
+  size_type bucket_count() const { return buckets.size(); }   //获取当前篮子个数
 
-  size_type max_bucket_count() const
+  size_type max_bucket_count() const  //获取最大篮子个数
     { return __stl_prime_list[__stl_num_primes - 1]; } 
 
-  size_type elems_in_bucket(size_type bucket) const
+  size_type elems_in_bucket(size_type bucket) const  //获取篮子元素个数
   {
     size_type result = 0;
     for (node* cur = buckets[bucket]; cur; cur = cur->next)

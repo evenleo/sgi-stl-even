@@ -46,6 +46,7 @@ RandomAccessIterator __lower_bound(RandomAccessIterator first, RandomAccessItera
     return first;
 }
 
+//返回指向范围 [first, last) 中首个不小于（即大于或等于）value 的元素的迭代器，或若找不到这种元素则返回 last 
 template <class ForwardIterator, class T>
 inline ForwardIterator lower_bound(ForwardIterator first, ForwardIterator last,
                                    const T& value) {
@@ -96,6 +97,7 @@ RandomAccessIterator __lower_bound(RandomAccessIterator first, RandomAccessItera
     return first;
 }
 
+//返回指向范围 [first, last) 中首个不小于（即大于或等于）value 的元素的迭代器，或若找不到这种元素则返回 last
 template <class ForwardIterator, class T, class Compare>
 inline ForwardIterator lower_bound(ForwardIterator first, ForwardIterator last,
                                    const T& value, Compare comp) {
