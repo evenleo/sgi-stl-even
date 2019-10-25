@@ -68,13 +68,14 @@ struct __hashtable_const_iterator {
     typedef Value value_type;
     typedef ptrdiff_t difference_type;
     typedef size_t size_type;
-    typedef Value& reference;
-    typedef Value* pointer;
+    typedef const Value& reference;
+    typedef const Value* pointer;
 
-    node* cur;
-    hashtable* ht;
+    const node* cur;
+    const hashtable* ht;
 
-    __hashtable_const_iterator(node* n, hashtable* tab) : cur(n), ht(tab) {}
+    __hashtable_const_iterator(const node* n, const hashtable* tab) 
+      : cur(n), ht(tab) {}
     __hashtable_const_iterator() {}
     __hashtable_const_iterator(const iterator& it) : cur(it.cur), ht(it.ht) {}
     reference operator*() const { return cur->val; }

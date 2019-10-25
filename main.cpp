@@ -10,6 +10,7 @@
 #include "stl_algobase.h"
 #include "stl_algo.h"
 #include "stl_uninitialized.h"
+#include "stl_function.h"
 #include "stl_hash_fun.h"
 #include "stl_vector.h"
 #include "stl_list.h" 
@@ -20,6 +21,7 @@
 #include "stl_set.h"
 #include "stl_multiset.h"
 #include "stl_hashtable.h"
+#include "stl_hash_set.h"
 
 /**************************list test*******************************/
 
@@ -270,12 +272,55 @@ void hashtable_test() {
         std::cout << *it << " ";
     }        
     std::cout << std::endl;           
+}
 
+void hash_set_test() {
+    STD::hash_set<int,
+                  STD::hash<int>>
+    hset(50);
+    hset.insert(2);
+    for (int i = 0; i < 53; ++i) {
+        hset.insert(i);
+    }
+    for (auto it = hset.begin(); it != hset.end(); ++it) {
+        std::cout << *it << " ";
+    }
+    std::cout << std::endl;
+    std::cout << hset.bucket_count() << std::endl;
+    hset.insert(2);
+    std::cout << hset.bucket_count() << std::endl;
+    hset.insert(100);
+    for (auto it = hset.begin(); it != hset.end(); ++it) {
+        std::cout << *it << " ";
+    }
+    std::cout << std::endl;
+    std::cout << hset.bucket_count() << std::endl;
+}
+
+void hash_multiset_test() {
+    STD::hash_multiset<int,
+                  STD::hash<int>>
+    hmset(50);
+    hmset.insert(2);
+    for (int i = 0; i < 53; ++i) {
+        hmset.insert(i);
+    }
+    for (auto it = hmset.begin(); it != hmset.end(); ++it) {
+        std::cout << *it << " ";
+    }
+    std::cout << std::endl;
+    std::cout << hmset.bucket_count() << std::endl;
+    hmset.insert(100);
+    for (auto it = hmset.begin(); it != hmset.end(); ++it) {
+        std::cout << *it << " ";
+    }
+    std::cout << std::endl;
+    std::cout << hmset.bucket_count() << std::endl;
 }
 
 int main()
 {
-    hashtable_test();
+    hash_set_test();
 
     system("pause");
     return 0;
