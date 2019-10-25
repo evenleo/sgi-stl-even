@@ -40,8 +40,8 @@ struct __hashtable_iterator {
     typedef Value& reference;
     typedef Value* pointer;
 
-    node* cur;
-    hashtable* ht;
+    node* cur;       //迭代器目前所指之节点
+    hashtable* ht;   //保持对容器的连结关系(因为需要从bucket调到bucket)
 
     __hashtable_iterator(node* n, hashtable* tab) : cur(n), ht(tab) {}  //迭代器构造函数，源码都调用这个
     __hashtable_iterator() {}
@@ -131,7 +131,7 @@ private:
 
   typedef __hashtable_node<Value> node;
   typedef simple_alloc<node, Alloc> node_allocator;
-  vector<node*, Alloc> buckets;
+  vector<node*, Alloc> buckets;   //以vector完成，可动态扩容
   size_type num_elements;
 
 public:
@@ -212,12 +212,12 @@ friend bool
 
 public:
 
-  size_type bucket_count() const { return buckets.size(); }   //获取当前篮子个数
+  size_type bucket_count() const { return buckets.size(); }   //获取当前桶个数
 
-  size_type max_bucket_count() const  //获取最大篮子个数
+  size_type max_bucket_count() const  //获取最大桶个数，即可以有多少个buckets
     { return __stl_prime_list[__stl_num_primes - 1]; } 
 
-  size_type elems_in_bucket(size_type bucket) const  //获取篮子元素个数
+  size_type elems_in_bucket(size_type bucket) const  //获取桶元素个数
   {
     size_type result = 0;
     for (node* cur = buckets[bucket]; cur; cur = cur->next)
@@ -225,9 +225,10 @@ public:
     return result;
   }
 
+  //插入元素，不允许重复
   pair<iterator, bool> insert_unique(const value_type& obj)
   {
-    resize(num_elements + 1);
+    resize(num_elements + 1);   //判断是否需要重建表格，如需要，就动手...
     return insert_unique_noresize(obj);
   }
 
@@ -339,10 +340,11 @@ public:
   void clear();
 
 private:
+  //返回最接近n并大于或等于n的质素
   size_type next_size(size_type n) const { return __stl_next_prime(n); }
 
   void initialize_buckets(size_type n)
-  {
+  {  //举例：传入50，返回53。保存53个元素空间，然后将其全部填0
     const size_type n_buckets = next_size(n);
     buckets.reserve(n_buckets);
     buckets.insert(buckets.end(), n_buckets, (node*) 0);
@@ -398,10 +400,11 @@ __hashtable_iterator<V, K, HF, ExK, EqK, A>&
 __hashtable_iterator<V, K, HF, ExK, EqK, A>::operator++()
 {
   const node* old = cur;
-  cur = cur->next;
+  cur = cur->next;       //如果存在就是它，否则进入以下if流程
   if (!cur) {
+    //根据元素值，定位bucket
     size_type bucket = ht->bkt_num(old->val);
-    while (!cur && ++bucket < ht->buckets.size())
+    while (!cur && ++bucket < ht->buckets.size()) //++bucket找到cur存在为止
       cur = ht->buckets[bucket];
   }
   return *this;
@@ -412,13 +415,13 @@ inline __hashtable_iterator<V, K, HF, ExK, EqK, A>
 __hashtable_iterator<V, K, HF, ExK, EqK, A>::operator++(int)
 {
   iterator tmp = *this;
-  ++*this;
+  ++*this;   //调用operator++()
   return tmp;
 }
 
 template <class V, class K, class HF, class ExK, class EqK, class A>
 __hashtable_const_iterator<V, K, HF, ExK, EqK, A>&
-__hashtable_const_iterator<V, K, HF, ExK, EqK, A>::operator++()
+__hashtable_const_iterator<V, K, HF, ExK, EqK, A>::operator++()  //和非const处理流程一样
 {
   const node* old = cur;
   cur = cur->next;
@@ -468,17 +471,20 @@ inline void swap(hashtable<Val, Key, HF, Extract, EqKey, A>& ht1,
 
 #endif 
 
+//在不需要重建表格的情况下插入新节点。键值不允许重复
 template <class V, class K, class HF, class Ex, class Eq, class A>
 pair<typename hashtable<V, K, HF, Ex, Eq, A>::iterator, bool> 
 hashtable<V, K, HF, Ex, Eq, A>::insert_unique_noresize(const value_type& obj)
 {
-  const size_type n = bkt_num(obj);
-  node* first = buckets[n];
+  const size_type n = bkt_num(obj);  //决定obj应位于#n bucket
+  node* first = buckets[n];  //另first指向bucket对应之串行头部
 
+  //如果bucket已被占用，即first不为0，进入下面循环
   for (node* cur = first; cur; cur = cur->next) 
-    if (equals(get_key(cur->val), get_key(obj)))
+    if (equals(get_key(cur->val), get_key(obj)))  //如发现与链表中某键值相同，就不插入，立刻返回
       return pair<iterator, bool>(iterator(cur, this), false);
 
+  //离开以上循环或根本不进入循环，创建新节点，插入到链表头部
   node* tmp = new_node(obj);
   tmp->next = first;
   buckets[n] = tmp;
@@ -678,18 +684,19 @@ hashtable<V, K, HF, Ex, Eq, A>::erase(const const_iterator& it)
                  const_cast<hashtable*>(it.ht)));
 }
 
+//以下函数判断是否需要重建表格。如果不需要立刻返回。如果需要，就动手...
 template <class V, class K, class HF, class Ex, class Eq, class A>
 void hashtable<V, K, HF, Ex, Eq, A>::resize(size_type num_elements_hint)
 {
   const size_type old_n = buckets.size();
-  if (num_elements_hint > old_n) {
-    const size_type n = next_size(num_elements_hint);
+  if (num_elements_hint > old_n) {  //元素个数大于vector的大小，就重建表格
+    const size_type n = next_size(num_elements_hint);  //找下一个质数
     if (n > old_n) {
-      vector<node*, A> tmp(n, (node*) 0);
+      vector<node*, A> tmp(n, (node*) 0);  //建立新的buckets
       __STL_TRY {
-        for (size_type bucket = 0; bucket < old_n; ++bucket) {
+        for (size_type bucket = 0; bucket < old_n; ++bucket) {  //循环处理每一个旧bucket
           node* first = buckets[bucket];
-          while (first) {
+          while (first) {  //循环将链表的值复制到新的bucket，过程链表操作不难理解
             size_type new_bucket = bkt_num(first->val, n);
             buckets[bucket] = first->next;
             first->next = tmp[new_bucket];
@@ -697,10 +704,10 @@ void hashtable<V, K, HF, Ex, Eq, A>::resize(size_type num_elements_hint)
             first = buckets[bucket];          
           }
         }
-        buckets.swap(tmp);
+        buckets.swap(tmp);  //两个buckets对调，tmp是局部变量，离开时释放内存
       }
 #         ifdef __STL_USE_EXCEPTIONS
-      catch(...) {
+      catch(...) {  //抛出异常释放tmp内存空间
         for (size_type bucket = 0; bucket < tmp.size(); ++bucket) {
           while (tmp[bucket]) {
             node* next = tmp[bucket]->next;
