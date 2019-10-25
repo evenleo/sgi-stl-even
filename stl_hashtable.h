@@ -176,7 +176,7 @@ public:
       get_key = ht.get_key;
       copy_from(ht);
     }
-    return this;
+    return *this;
   }
   ~hashtable() { clear(); }
 
@@ -199,13 +199,13 @@ public:
     return end();
   }
   iterator end() { return iterator(0, this); }
-  const_iterator cbegin() {
+  const_iterator begin() const {
     for (size_type n = 0; n < buckets.size(); ++n) 
       if (buckets[n])
         return const_iterator(buckets[n], this);
-    return cend();
+    return end();
   }
-  const_iterator cend() { return const_iterator(0, this); }
+  const_iterator end() const { return const_iterator(0, this); }
 
 friend bool
   operator==__STL_NULL_TMPL_ARGS(const hashtable&, const hashtable&);
@@ -232,9 +232,10 @@ public:
     return insert_unique_noresize(obj);
   }
 
+  //插入元素，允许重复
   iterator insert_equal(const value_type& obj)
   {
-    resize(num_elements + 1);
+    resize(num_elements + 1);  //判断是否需要重建表格，如需要，就动手...
     return insert_equal_noresize(obj);
   }
 
@@ -351,12 +352,12 @@ private:
     num_elements = 0;
   }
 
-  size_type bkt_num_key(const key_type& key) const
+  size_type bkt_num_key(const key_type& key) const  //根据key值确定落脚bucket的索引
   {
     return bkt_num_key(key, buckets.size());
   }
 
-  size_type bkt_num(const value_type& obj) const
+  size_type bkt_num(const value_type& obj) const  //根据实值确定落脚bucket的索引
   {
     return bkt_num_key(get_key(obj));
   }
@@ -447,18 +448,18 @@ bool operator==(const hashtable<V, K, HF, Ex, Eq, A>& ht1,
                 const hashtable<V, K, HF, Ex, Eq, A>& ht2)
 {
   typedef typename hashtable<V, K, HF, Ex, Eq, A>::node node;
-  if (ht1.buckets.size() != ht2.buckets.size())
+  if (ht1.buckets.size() != ht2.buckets.size())      //buckets的size()不相等直接返回false
     return false;
-  for (int n = 0; n < ht1.buckets.size(); ++n) {
+  for (int n = 0; n < ht1.buckets.size(); ++n) {     //循环buckets
     node* cur1 = ht1.buckets[n];
     node* cur2 = ht2.buckets[n];
-    for ( ; cur1 && cur2 && cur1->val == cur2->val;
-          cur1 = cur1->next, cur2 = cur2->next)
+    for ( ; cur1 && cur2 && cur1->val == cur2->val;  //循环链表，循环条件两个节点存在且相等
+          cur1 = cur1->next, cur2 = cur2->next)      //如果两链表相等，最后应该cur1和cur2均为0
       {}
-    if (cur1 || cur2)
+    if (cur1 || cur2)  //只要有一个不为空则直接返回false
       return false;
   }
-  return true;
+  return true;  //以上均不返回，则认定为两hashtable相等，返回true
 }  
 
 #ifdef __STL_FUNCTION_TMPL_PARTIAL_ORDER
@@ -477,7 +478,7 @@ pair<typename hashtable<V, K, HF, Ex, Eq, A>::iterator, bool>
 hashtable<V, K, HF, Ex, Eq, A>::insert_unique_noresize(const value_type& obj)
 {
   const size_type n = bkt_num(obj);  //决定obj应位于#n bucket
-  node* first = buckets[n];  //另first指向bucket对应之串行头部
+  node* first = buckets[n];  //令first指向bucket对应之串行头部
 
   //如果bucket已被占用，即first不为0，进入下面循环
   for (node* cur = first; cur; cur = cur->next) 
@@ -492,15 +493,17 @@ hashtable<V, K, HF, Ex, Eq, A>::insert_unique_noresize(const value_type& obj)
   return pair<iterator, bool>(iterator(tmp, this), true);
 }
 
+//在不需要重建表格的情况下插入新节点。键值允许重复
 template <class V, class K, class HF, class Ex, class Eq, class A>
 typename hashtable<V, K, HF, Ex, Eq, A>::iterator 
 hashtable<V, K, HF, Ex, Eq, A>::insert_equal_noresize(const value_type& obj)
 {
-  const size_type n = bkt_num(obj);
-  node* first = buckets[n];
+  const size_type n = bkt_num(obj);  //决定obj应位于#n bucket
+  node* first = buckets[n];  //令first指向bucket对应之串行头部
 
+  //如果bucket已被占用，即first不为0，进入下面循环
   for (node* cur = first; cur; cur = cur->next) 
-    if (equals(get_key(cur->val), get_key(obj))) {
+    if (equals(get_key(cur->val), get_key(obj))) {  //如果发现与链表中某键值相同，马上插入然后返回
       node* tmp = new_node(obj);
       tmp->next = cur->next;
       cur->next = tmp;
@@ -508,6 +511,7 @@ hashtable<V, K, HF, Ex, Eq, A>::insert_equal_noresize(const value_type& obj)
       return iterator(tmp, this);
     }
 
+  //离开以上循环或根本不进入循环，创建新节点，插入到链表头部
   node* tmp = new_node(obj);
   tmp->next = first;
   buckets[n] = tmp;
@@ -515,6 +519,7 @@ hashtable<V, K, HF, Ex, Eq, A>::insert_equal_noresize(const value_type& obj)
   return iterator(tmp, this);
 }
 
+//根绝value值查找节点，找到则直接返回节点值，否则插入然后返回节点值
 template <class V, class K, class HF, class Ex, class Eq, class A>
 typename hashtable<V, K, HF, Ex, Eq, A>::reference 
 hashtable<V, K, HF, Ex, Eq, A>::find_or_insert(const value_type& obj)
@@ -525,9 +530,10 @@ hashtable<V, K, HF, Ex, Eq, A>::find_or_insert(const value_type& obj)
   node* first = buckets[n];
 
   for (node* cur = first; cur; cur = cur->next)
-    if (equals(get_key(cur->val), get_key(obj)))
+    if (equals(get_key(cur->val), get_key(obj)))  //找到则直接返回节点值
       return cur->val;
-
+  
+  //否则插入然后返回节点值
   node* tmp = new_node(obj);
   tmp->next = first;
   buckets[n] = tmp;
@@ -535,29 +541,31 @@ hashtable<V, K, HF, Ex, Eq, A>::find_or_insert(const value_type& obj)
   return tmp->val;
 }
 
+//获取键值为key的左开右闭区间
 template <class V, class K, class HF, class Ex, class Eq, class A>
 pair<typename hashtable<V, K, HF, Ex, Eq, A>::iterator,
      typename hashtable<V, K, HF, Ex, Eq, A>::iterator> 
 hashtable<V, K, HF, Ex, Eq, A>::equal_range(const key_type& key)
 {
   typedef pair<iterator, iterator> pii;
-  const size_type n = bkt_num_key(key);
+  const size_type n = bkt_num_key(key);  //确定buckets的位置
 
   for (node* first = buckets[n]; first; first = first->next) {
-    if (equals(get_key(first->val), key)) {
+    if (equals(get_key(first->val), key)) {  //循环链表，找到第一个键值与key相等的节点first
       for (node* cur = first->next; cur; cur = cur->next)
-        if (!equals(get_key(cur->val), key))
-          return pii(iterator(first, this), iterator(cur, this));
-      for (size_type m = n + 1; m < buckets.size(); ++m)
-        if (buckets[m])
+        if (!equals(get_key(cur->val), key))  //如果在当前bucket后面找到第一个键值与key不相等的节点cur
+          return pii(iterator(first, this), iterator(cur, this));  //[first, cur)就是所求
+      for (size_type m = n + 1; m < buckets.size(); ++m)  //如果在后面buckets继续找不为空的bucket
+        if (buckets[m])                                   //[first, buckets[m])就是所求
           return pii(iterator(first, this),
                      iterator(buckets[m], this));
-      return pii(iterator(first, this), end());
+      return pii(iterator(first, this), end());  //上面不返回，这里[first, end())就是所求
     }
   }
-  return pii(end(), end());
+  return pii(end(), end());  //没找到，返回[end(), end())
 }
 
+//获取键值为key的左开右闭区间，分析过程和上面一样
 template <class V, class K, class HF, class Ex, class Eq, class A>
 pair<typename hashtable<V, K, HF, Ex, Eq, A>::const_iterator, 
      typename hashtable<V, K, HF, Ex, Eq, A>::const_iterator> 
@@ -586,14 +594,14 @@ template <class V, class K, class HF, class Ex, class Eq, class A>
 typename hashtable<V, K, HF, Ex, Eq, A>::size_type 
 hashtable<V, K, HF, Ex, Eq, A>::erase(const key_type& key)
 {
-  const size_type n = bkt_num_key(key);
+  const size_type n = bkt_num_key(key);  //获取buckets的位置
   node* first = buckets[n];
   size_type erased = 0;
 
   if (first) {
     node* cur = first;
     node* next = cur->next;
-    while (next) {
+    while (next) {  //删除头结点后面所有键值和key相等的节点
       if (equals(get_key(next->val), key)) {
         cur->next = next->next;
         delete_node(next);
@@ -606,29 +614,29 @@ hashtable<V, K, HF, Ex, Eq, A>::erase(const key_type& key)
         next = cur->next;
       }
     }
-    if (equals(get_key(first->val), key)) {
+    if (equals(get_key(first->val), key)) {  //如果头结点键值也等于key，删除头结点
       buckets[n] = first->next;
       delete_node(first);
       ++erased;
       --num_elements;
     }
   }
-  return erased;
+  return erased;  //返回删除的元素个数
 }
 
 template <class V, class K, class HF, class Ex, class Eq, class A>
 void hashtable<V, K, HF, Ex, Eq, A>::erase(const iterator& it)
 {
-  if (node* const p = it.cur) {
-    const size_type n = bkt_num(p->val);
+  if (node* const p = it.cur) {  //如果it.cur不为空则进入以下删除操作
+    const size_type n = bkt_num(p->val);  //定位p的buckets位置
     node* cur = buckets[n];
 
-    if (cur == p) {
+    if (cur == p) {  //p为头结点，直接执行删除
       buckets[n] = cur->next;
       delete_node(cur);
       --num_elements;
     }
-    else {
+    else {  //下面循环找到p的位置删除
       node* next = cur->next;
       while (next) {
         if (next == p) {
@@ -646,6 +654,7 @@ void hashtable<V, K, HF, Ex, Eq, A>::erase(const iterator& it)
   }
 }
 
+//删除指定区间[first, last)的元素
 template <class V, class K, class HF, class Ex, class Eq, class A>
 void hashtable<V, K, HF, Ex, Eq, A>::erase(iterator first, iterator last)
 {
@@ -665,6 +674,7 @@ void hashtable<V, K, HF, Ex, Eq, A>::erase(iterator first, iterator last)
   }
 }
 
+//同上，删除指定区间[first, last)的元素
 template <class V, class K, class HF, class Ex, class Eq, class A>
 inline void
 hashtable<V, K, HF, Ex, Eq, A>::erase(const_iterator first,
@@ -722,18 +732,20 @@ void hashtable<V, K, HF, Ex, Eq, A>::resize(size_type num_elements_hint)
   }
 }
 
+//删除指定映射的所有元素
 template <class V, class K, class HF, class Ex, class Eq, class A>
 void hashtable<V, K, HF, Ex, Eq, A>::erase_bucket(const size_type n, 
                                                   node* first, node* last)
 {
   node* cur = buckets[n];
-  if (cur == first)
+  if (cur == first)  //如果first为bucket的头结点，调用下面erase_bucket的重载函数
     erase_bucket(n, last);
   else {
     node* next;
+    //找出链表中first的位置next
     for (next = cur->next; next != first; cur = next, next = cur->next)
       ;
-    while (next) {
+    while (next) {  //然后删除至链表结尾, 这里有个疑问：条件不应该是next！= last吗？
       cur->next = next->next;
       delete_node(next);
       next = cur->next;
@@ -742,11 +754,11 @@ void hashtable<V, K, HF, Ex, Eq, A>::erase_bucket(const size_type n,
   }
 }
 
+//删除buckets[n]中到last之前的节点
 template <class V, class K, class HF, class Ex, class Eq, class A>
-void 
-hashtable<V, K, HF, Ex, Eq, A>::erase_bucket(const size_type n, node* last)
+void hashtable<V, K, HF, Ex, Eq, A>::erase_bucket(const size_type n, node* last)
 {
-  node* cur = buckets[n];
+  node* cur = buckets[n];  
   while (cur != last) {
     node* next = cur->next;
     delete_node(cur);
@@ -759,38 +771,38 @@ hashtable<V, K, HF, Ex, Eq, A>::erase_bucket(const size_type n, node* last)
 template <class V, class K, class HF, class Ex, class Eq, class A>
 void hashtable<V, K, HF, Ex, Eq, A>::clear()
 {
-  for (size_type i = 0; i < buckets.size(); ++i) {
-    node* cur = buckets[i];
+  for (size_type i = 0; i < buckets.size(); ++i) {  //循环buckets
+    node* cur = buckets[i];  //逐个删除链表节点
     while (cur != 0) {
       node* next = cur->next;
       delete_node(cur);
       cur = next;
     }
-    buckets[i] = 0;
+    buckets[i] = 0;  //将桶置为空
   }
-  num_elements = 0;
+  num_elements = 0;  //元素数量置为0
 }
 
     
 template <class V, class K, class HF, class Ex, class Eq, class A>
 void hashtable<V, K, HF, Ex, Eq, A>::copy_from(const hashtable& ht)
 {
-  buckets.clear();
-  buckets.reserve(ht.buckets.size());
-  buckets.insert(buckets.end(), ht.buckets.size(), (node*) 0);
+  buckets.clear();  //清空buckets。vector操作
+  buckets.reserve(ht.buckets.size());  //buckets大小置为ht的一样大小
+  buckets.insert(buckets.end(), ht.buckets.size(), (node*) 0);  //将每个bucket置为0
   __STL_TRY {
-    for (size_type i = 0; i < ht.buckets.size(); ++i) {
-      if (const node* cur = ht.buckets[i]) {
-        node* copy = new_node(cur->val);
+    for (size_type i = 0; i < ht.buckets.size(); ++i) {  //循环buckets
+      if (const node* cur = ht.buckets[i]) {  //ht.buckets[i]该桶不为空，进入以下复制操作
+        node* copy = new_node(cur->val);  //将链表第一个节点复制到buckets[i]
         buckets[i] = copy;
-
+        //将链表后续的节点循环复制
         for (node* next = cur->next; next; cur = next, next = cur->next) {
           copy->next = new_node(next->val);
           copy = copy->next;
         }
       }
     }
-    num_elements = ht.num_elements;
+    num_elements = ht.num_elements;  //元素个数置为ht的一样
   }
   __STL_UNWIND(clear());
 }

@@ -258,6 +258,18 @@ void hashtable_test() {
         std::cout << *it << " ";
     }
     std::cout << std::endl;
+ 
+    std::cout << "test copy constructor" << std::endl;
+    STD::hashtable<const char*, 
+                   const char*, 
+                   STD::hash<const char*>, 
+                   STD::identity<const char*>,
+                   eqstr, STD::alloc> 
+    tmp = ht;
+    for (auto it = tmp.begin(); it != tmp.end(); ++ it) {
+        std::cout << *it << " ";
+    }        
+    std::cout << std::endl;           
 
 }
 
