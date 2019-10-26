@@ -12,9 +12,11 @@
 
 __STL_BEGIN_NAMESPACE
 
+//一级配置器，直接调用malloc和free函数申请和释放内存
 template<int inst>
 class __malloc_alloc_template {
 private:
+    //oom = out of memroy，当内存不足时，使用下面这两个函数
     static void *oom_malloc(size_t);
     static void *oom_realloc(void*, size_t);
     static void (*__malloc_alloc_oom_handler)();
@@ -22,11 +24,12 @@ private:
 public:
     static void *allocate(size_t n) {
         void *result = malloc(n);
-        if (0 == result)
+        if (0 == result)  //如果不足，用下面处理方法
             result = oom_malloc(n);
         return result;
     }
-
+    
+    //直接释放
     static void deallocate(void* p, size_t /*n*/)
     {
         free(p);
@@ -34,7 +37,7 @@ public:
 
     static void *reallocate(void *p, size_t /*old_sz*/, size_t new_sz) {
         void *result = realloc(p, new_sz);
-        if (0 == result)
+        if (0 == result)  //如果不足，用下面处理方法
             result = oom_realloc(p, new_sz);
         return result;
     }
@@ -50,6 +53,7 @@ public:
 template<int inst>
 void (*__malloc_alloc_template<inst>::__malloc_alloc_oom_handler)() = 0;
 
+//malloc内存不够的处理函数
 template<int inst>
 void *__malloc_alloc_template<inst>::oom_malloc(size_t n)
 {
@@ -60,15 +64,16 @@ void *__malloc_alloc_template<inst>::oom_malloc(size_t n)
         my_malloc_handler = __malloc_alloc_oom_handler;
         if (0 == my_malloc_handler)
         {
-            __THROW_BAD_ALLOC;
+            __THROW_BAD_ALLOC;   //如果没有设置处理函数，抛出异常退出
         }
-        (*my_malloc_handler)();
-        result = malloc(n);
+        (*my_malloc_handler)();  //设置了处理函数，调用之，这里推测应该是回收一些内存的操作
+        result = malloc(n);      //重新调用malloc，申请空间成功则返回地址，否则继续本循环
         if (result)
             return result;
     }
 }
 
+//realloc内存不够的处理函数，处理过程和上面函数类似，不注释了
 template<int inst>
 void *__malloc_alloc_template<inst>::oom_realloc(void *p, size_t n)
 {
@@ -87,7 +92,7 @@ void *__malloc_alloc_template<inst>::oom_realloc(void *p, size_t n)
     }
 }
 
-typedef __malloc_alloc_template<0> malloc_alloc;
+typedef __malloc_alloc_template<0> malloc_alloc;  //一级配置器全局变量
 
 template<class T, class Alloc>
 class simple_alloc {
@@ -102,9 +107,9 @@ public:
                 { Alloc::deallocate(p, sizeof(T)); }
 };
 
+//二级配置器，申请空间大于128byte使用一级配置器，否则使用二级配置器
 template<bool threads, int inst>
 class __default_alloc_template {
-
 private:
 	enum { ALIGN = 8 };
 	enum { MAX_BYTES = 128 };
@@ -170,7 +175,7 @@ public:
 	static void *reallocate(void *p, size_t old_sz, size_t new_sz);
 };
 
-typedef __default_alloc_template<__NODE_ALLOCATOR_THREADS, 0> alloc;
+typedef __default_alloc_template<__NODE_ALLOCATOR_THREADS, 0> alloc;  //二级配置器全局变量
 typedef __default_alloc_template<false, 0> single_client_alloc;
 
 template<bool threads, int inst>
