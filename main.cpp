@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 
 #include "stl_config.h"
 #include "type_traits.h"
@@ -22,6 +23,7 @@
 #include "stl_multiset.h"
 #include "stl_hashtable.h"
 #include "stl_hash_set.h"
+#include "stl_map.h"
 
 /**************************list test*******************************/
 
@@ -318,9 +320,24 @@ void hash_multiset_test() {
     std::cout << hmset.bucket_count() << std::endl;
 }
 
+void map_test() {
+    STD::map<int, std::string> map;
+    map.insert(STD::make_pair<int, std::string>(101, "even"));
+    map.insert(STD::make_pair<int, std::string>(102, "cury"));
+    map.insert(STD::make_pair<int, std::string>(103, "olvin"));
+    map.insert(STD::make_pair<int, std::string>(104, "onio"));
+    for (auto it = map.begin(); it != map.end(); ++it) {
+        std::cout << it->first << ": " << it->second << std::endl;
+    }
+
+    std::cout << "map[103]:" << map[103] << std::endl;
+    std::cout << "map[105]:" << map[105] << std::endl;
+
+}
+
 int main()
 {
-    hash_set_test();
+    map_test();
 
     system("pause");
     return 0;
