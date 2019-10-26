@@ -24,6 +24,7 @@
 #include "stl_hashtable.h"
 #include "stl_hash_set.h"
 #include "stl_map.h"
+#include "stl_multimap.h"
 
 /**************************list test*******************************/
 
@@ -326,18 +327,37 @@ void map_test() {
     map.insert(STD::make_pair<int, std::string>(102, "cury"));
     map.insert(STD::make_pair<int, std::string>(103, "olvin"));
     map.insert(STD::make_pair<int, std::string>(104, "onio"));
+    map.insert(STD::make_pair<int, std::string>(104, "koko"));
     for (auto it = map.begin(); it != map.end(); ++it) {
         std::cout << it->first << ": " << it->second << std::endl;
     }
 
     std::cout << "map[103]:" << map[103] << std::endl;
     std::cout << "map[105]:" << map[105] << std::endl;
+}
 
+void multimap_test() {
+    STD::multimap<int, std::string> mutimap;
+    mutimap.insert(STD::make_pair<int, std::string>(101, "even"));
+    mutimap.insert(STD::make_pair<int, std::string>(102, "cury"));
+    mutimap.insert(STD::make_pair<int, std::string>(103, "olvin"));
+    mutimap.insert(STD::make_pair<int, std::string>(104, "onio"));
+    mutimap.insert(STD::make_pair<int, std::string>(104, "koko"));
+    for (auto it = mutimap.begin(); it != mutimap.end(); ++it) {
+        std::cout << it->first << ": " << it->second << std::endl;
+    }
+
+    std::cout << "test lower_bound and upper_bound" << std::endl;
+    auto lower_it = mutimap.lower_bound(104);
+    auto upper_it = mutimap.upper_bound(104);
+    for ( ; lower_it != upper_it; ++lower_it) {
+        std::cout << lower_it->first << ": " << lower_it->second << std::endl;
+    }
 }
 
 int main()
 {
-    map_test();
+    multimap_test();
 
     system("pause");
     return 0;
