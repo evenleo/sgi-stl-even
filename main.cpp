@@ -369,7 +369,6 @@ void test_heap() {
 int main()
 {
     test_heap();
-    // multimap_test();
 
 
     system("pause");
