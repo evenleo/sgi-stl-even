@@ -3,9 +3,11 @@
 
 __STL_BEGIN_NAMESPACE
 
+//http://ju.outofmemory.cn/entry/108845
 
 template <class RandomAccessIterator>
 inline void push_heap(RandomAccessIterator first, RandomAccessIterator last) {
+  //注意，调用该函数时候，新元素位于最后一个位置(last-1)
   __push_heap_aux(first, last, distance_type(first), value_type(first));
 }
 
@@ -14,18 +16,20 @@ inline void __push_heap_aux(RandomAccessIterator first,
                             RandomAccessIterator last, Distance*, T*) {
   __push_heap(first, Distance((last - first) - 1), Distance(0), 
               T(*(last - 1)));
+  //(last-first)–1代表新元素的索引，0是堆首的索引，*(last - 1)是新加入的值              
 }
 
 template <class RandomAccessIterator, class Distance, class T>
 void __push_heap(RandomAccessIterator first, Distance holeIndex,
                  Distance topIndex, T value) {
-  Distance parent = (holeIndex - 1) / 2;
+  Distance parent = (holeIndex - 1) / 2;  //找出父节点
   while (holeIndex > topIndex && *(first + parent) < value) {
-    *(first + holeIndex) = *(first + parent);
-    holeIndex = parent;
-    parent = (holeIndex - 1) / 2;
+    //尚未到达顶端且父节点小于洞值，使用operator<，知max-heap
+    *(first + holeIndex) = *(first + parent);  //令洞值为父值
+    holeIndex = parent;                        //新洞为父节点
+    parent = (holeIndex - 1) / 2;              //新洞的父节点
   }    
-  *(first + holeIndex) = value;
+  *(first + holeIndex) = value;  //令洞值为新值
 }
 
 template <class RandomAccessIterator>
