@@ -3,8 +3,6 @@
 
 __STL_BEGIN_NAMESPACE
 
-//http://ju.outofmemory.cn/entry/108845
-
 template <class RandomAccessIterator, class Distance, class T>
 void __push_heap(RandomAccessIterator first, Distance holeIndex,
                  Distance topIndex, T value) {
