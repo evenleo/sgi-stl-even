@@ -26,6 +26,7 @@
 #include "stl_map.h"
 #include "stl_multimap.h"
 #include "stl_heap.h"
+#include "stl_queue.h"
 
 /**************************list test*******************************/
 
@@ -373,10 +374,23 @@ void test_heap() {
     std::cout << std::endl;
 }
 
+void priority_queue_test() {
+    STD::priority_queue<int> pqueue;
+    for (int i = 0; i < 100; ++i) {
+        int r = rand() % 100;
+        pqueue.push(r);
+    }
+
+    for (int i = 0; i < 100; ++i) {
+        std::cout << pqueue.top() << " ";
+        pqueue.pop();
+    }
+    std::cout << std::endl;
+}
+
 int main()
 {
-    test_heap();
-
+    priority_queue_test();
 
     system("pause");
     return 0;

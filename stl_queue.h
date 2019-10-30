@@ -1,6 +1,8 @@
 #ifndef __SGI_STL_INTERNAL_QUEUE_H
 #define __SGI_STL_INTERNAL_QUEUE_H
 
+__STL_BEGIN_NAMESPACE
+
 template <class T, class Sequence = vector<T>,
           class Compare = less<typename Sequence::value_type> >
 class priority_queue {
@@ -21,16 +23,27 @@ public:
     : c(first, last), comp(x) { make_heap(c.begin(), c.end(), comp); }
   template <class InputIterator>
   priority_queue(InputIterator first, InputIterator last)
-    : c(fist, last) { make_heap(c.begin(), c.end(), comp); }
+    : c(first, last) { make_heap(c.begin(), c.end(), comp); }
 
   bool empty() const { return c.empty(); }
   size_type size() const { return c.size(); }
-  const_reference top { return c.front(); }
+  const_reference top() { return c.front(); }
   void push(const value_type& x) {
     __STL_TRY {
-      
+      c.push_back(x);
+      push_heap(c.begin(), c.end(), comp);
     }
+    __STL_UNWIND(c.clear());
+  }
+  void pop() {
+    __STL_TRY {
+      pop_heap(c.begin(), c.end(), comp);
+      c.pop_back();
+    }
+    __STL_UNWIND(c.clear());
   }
 };          
+
+__STL_END_NAMESPACE
 
 #endif
