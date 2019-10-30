@@ -107,6 +107,11 @@ value_type(const Iterator&) {
     return static_cast<typename iterator_traits<Iterator>::value_type*>(0);
 }
 
+template <class T>
+inline random_access_iterator_tag iterator_category(const T*) {
+  return random_access_iterator_tag();
+}
+
 template<class InputIterator, class Distance>
 inline void __distance(InputIterator first, InputIterator last, Distance& n,
                        input_iterator_tag) {

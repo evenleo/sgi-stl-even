@@ -25,6 +25,7 @@
 #include "stl_hash_set.h"
 #include "stl_map.h"
 #include "stl_multimap.h"
+#include "stl_heap.h"
 
 /**************************list test*******************************/
 
@@ -355,9 +356,21 @@ void multimap_test() {
     }
 }
 
+void test_heap() {
+    int ia[9] = {0, 1, 2, 3, 4, 8, 9, 3, 5};
+    STD::vector<int> vec(ia, ia+9);
+    STD::make_heap(vec.begin(), vec.end());
+    for (auto i : vec) {
+        std::cout << i << " ";
+    }
+    std::cout << std::endl;
+}
+
 int main()
 {
-    multimap_test();
+    test_heap();
+    // multimap_test();
+
 
     system("pause");
     return 0;
