@@ -27,6 +27,7 @@
 #include "stl_multimap.h"
 #include "stl_heap.h"
 #include "stl_queue.h"
+#include "stl_deque.h"
 
 /**************************list test*******************************/
 
