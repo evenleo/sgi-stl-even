@@ -364,6 +364,13 @@ void test_heap() {
         std::cout << i << " ";
     }
     std::cout << std::endl;
+
+    std::cout << "sort_heap:" << std::endl;
+    STD::sort_heap(vec.begin(), vec.end());
+    for (auto i : vec) {
+        std::cout << i << " ";
+    }
+    std::cout << std::endl;
 }
 
 int main()
