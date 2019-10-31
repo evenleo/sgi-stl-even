@@ -73,9 +73,7 @@ struct __deque_iterator {
     return tmp;
   }
   
-  /*
-  *
-  */
+
   self& operator+=(difference_type n) {
     difference_type offset = n + (cur - first);
     if (offset >= 0 && offset < difference_type(buffer_size()))
@@ -84,6 +82,15 @@ struct __deque_iterator {
       difference_type node_offset =
         offset > 0 ? offset / difference_type(buffer_size())
                    : -difference_type((-offset - 1) / buffer_size()) - 1;
+                     /*
+                     *  前面取整后要减 1 是因为offset为-1 也要向后跳一个缓冲区
+                     *  -offset-1 再除以 buffer_size(): 只要是负数(如offset为-1)
+                     *  就需要跳一个缓冲区，如果不减1会出现多跳一个缓冲区的现象，
+                     *  如offset == -8 时，node_offset 应该为-1，cur退到下一个
+                     *  缓冲区的first位置。而如果直接 (-offset) / buffer_size() 
+                     *  则多跳一个缓冲区。这里设计非常巧妙，我也用了很久才弄懂，
+                     *  这里和offset为正数的情况是不一样的，需要用不一样的角度思考
+                     */
       set_node(node + node_offset);
       cur = first + (offset - node_offset * difference_type(buffer_size()));
     }
@@ -539,16 +546,19 @@ void deque<T, Alloc, BufSize>::clear() {
 
 template <class T, class Alloc, size_t BufSize>
 void deque<T, Alloc, BufSize>::create_map_and_nodes(size_type num_elements) {
+  //需要节点数=元素个数/缓冲区大小+1，如果刚好整除就多分配一个节点
   size_type num_nodes = num_elements / buffer_size() + 1;
-
+  
+  //map管理节点数，最少为8，最多为所需节点+2
   map_size = max(initial_map_size(), num_nodes + 2);
   map = map_allocator::allocate(map_size);
 
+  //令nstart和nfinish保持最中央，多出所需节点两头分配，(map_size - num_nodes)/2就达到这个效果
   map_pointer nstart = map + (map_size - num_nodes) / 2;
-  map_pointer nfinish = nstart + num_nodes - 1;
+  map_pointer nfinish = nstart + num_nodes - 1;  //-1是因为nstart也占了一个节点
     
   map_pointer cur;
-  __STL_TRY {
+  __STL_TRY {  //为每个节点配置缓冲区
     for (cur = nstart; cur <= nfinish; ++cur)
       *cur = allocate_node();
   }
@@ -896,22 +906,26 @@ void deque<T, Alloc, BufSize>::reallocate_map(size_type nodes_to_add,
   size_type new_num_nodes = old_num_nodes + nodes_to_add;
 
   map_pointer new_nstart;
-  if (map_size > 2 * new_num_nodes) {
+  if (map_size > 2 * new_num_nodes) {  
+    //如此判断是因为下面new_map_size最小是map_size的两倍+2，最大是map_size + nodes_to_add + 2
+    //此时nodes_to_add不为1且大于map_size,也只有这种情况满足条件map_size > 2 * new_num_nodes
     new_nstart = map + (map_size - new_num_nodes) / 2 
-                     + (add_at_front ? nodes_to_add : 0);
-    if (new_nstart < start.node)
-      copy(start.node, finish.node + 1, new_nstart);
+                     + (add_at_front ? nodes_to_add : 0);  //在前面加入的话对应下面是向后移动的复制操作
+    if (new_nstart < start.node)  //分顺序拷贝和倒序拷贝因在同一块内存上操作，整体向前或向后移动一个节点，需考虑覆盖问题
+      copy(start.node, finish.node + 1, new_nstart);  //向前移动，new_nstart在前面，每次放置内容节点为start已复制节点
     else
-      copy_backward(start.node, finish.node + 1, new_nstart + old_num_nodes);
+      copy_backward(start.node, finish.node + 1, new_nstart + old_num_nodes);  
+      //向后移动，和向前移动相反，从后面向前操作
   }
   else {
+    //new_map_size最小是map_size的两倍+2，最大是map_size + nodes_to_add + 2
     size_type new_map_size = map_size + max(map_size, nodes_to_add) + 2;
 
-    map_pointer new_map = map_allocator::allocate(new_map_size);
+    map_pointer new_map = map_allocator::allocate(new_map_size);  //申请新空间
     new_nstart = new_map + (new_map_size - new_num_nodes) / 2
-                         + (add_at_front ? nodes_to_add : 0);
-    copy(start.node, finish.node + 1, new_nstart);
-    map_allocator::deallocate(map, map_size);
+                         + (add_at_front ? nodes_to_add : 0);     //设置新起点
+    copy(start.node, finish.node + 1, new_nstart);                //拷贝复制
+    map_allocator::deallocate(map, map_size);                     //释放原空间
 
     map = new_map;
     map_size = new_map_size;

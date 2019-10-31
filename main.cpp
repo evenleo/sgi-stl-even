@@ -389,9 +389,47 @@ void priority_queue_test() {
     std::cout << std::endl;
 }
 
+void offset_test() {
+    int size = 8;
+    int cur = 4;
+    int first = 0;
+    while (1) {
+        int n = 0;
+        std::cout << "input n: ";
+        std::cin >> n;
+        int offset = n + (cur - first);
+        if (offset >= 0 && offset < size) {
+            std::cout << "cur + offset" << std::endl;
+        } else {
+            if (offset > 0) {
+                std::cout << "offset / size: " << offset / size << std::endl;
+            } else {
+                std::cout << "-((-offset - 1) / size) - 1: " 
+                <<-((-offset - 1) / size) - 1 << std::endl;
+                 std::cout << "offset / size: " 
+                 << offset / size << std::endl;
+            }
+        }
+    }
+}
+
+void deque_test() {
+    STD::deque<int> deque;
+    deque.push_back(10);
+    deque.push_back(11);
+    deque.push_back(12);
+    deque.push_back(13);
+    deque.push_front(9);
+    deque.push_front(8);
+    for (auto i : deque) {
+        std::cout << i << " ";
+    }
+    std::cout << std::endl;
+}
+
 int main()
 {
-    priority_queue_test();
+    deque_test();
 
     system("pause");
     return 0;
