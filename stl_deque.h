@@ -72,7 +72,10 @@ struct __deque_iterator {
     --*this;
     return tmp;
   }
-
+  
+  /*
+  *
+  */
   self& operator+=(difference_type n) {
     difference_type offset = n + (cur - first);
     if (offset >= 0 && offset < difference_type(buffer_size()))
