@@ -28,6 +28,7 @@
 #include "stl_heap.h"
 #include "stl_queue.h"
 #include "stl_deque.h"
+#include "stl_stack.h"
 
 /**************************list test*******************************/
 
@@ -427,9 +428,20 @@ void deque_test() {
     std::cout << std::endl;
 }
 
+void stack_test() {  // 后进先出
+    STD::stack<int> stack;
+    for (int i = 0; i < 10; ++i) {
+        stack.push(i);
+    }
+    while (!stack.empty()) {
+        std::cout << stack.top() << " ";
+        stack.pop();
+    }
+}
+
 int main()
 {
-    deque_test();
+    stack_test();
 
     system("pause");
     return 0;
