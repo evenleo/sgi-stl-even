@@ -3,6 +3,62 @@
 
 __STL_BEGIN_NAMESPACE
 
+template <class T>
+inline T& __median(const T& a, const T& b, const T& c) {
+    if (a < b)
+        if (b < c) 
+            return b;
+        else if (a < c) 
+            return c;
+        else
+            return a;
+    else if (a < c)
+        return a;
+    else if (b < c) 
+        return c;
+    else 
+        return b;
+}
+
+template <class T, class Compare>
+inline T& __median(const T& a, const T& b, const T& c, Compare comp) {
+  if (comp(a, b))
+    if (comp(b, c))
+      return b;
+    else if (comp(a, c))
+      return c;
+    else
+      return a;
+  else if (comp(a, c))
+    return a;
+  else if (comp(b, c))
+    return c;
+  else
+    return b;
+}
+
+template <class InputIterator, class Function>
+Function for_each(InputIterator first, InputIterator last, Function f) {
+    for ( ; first != last; ++first)
+        f(*first);
+    return f;
+}
+
+template <class InputIterator, class T>
+InputIterator find(InputIterator first, InputIterator last, const T& value) {
+    while (first != last && *first != value) ++first;
+    return first;
+}
+
+template <class InputIterator, class Predicate>
+InputIterator find_if(InputIterator first, InputIterator last,
+                      Predicate pred) {
+    while (first != last && !pred(*first)) ++first;
+    return first;
+}
+
+
+
 template <class ForwardIterator, class T, class Distance>
 ForwardIterator __lower_bound(ForwardIterator first, ForwardIterator last, 
                               const T& value, Distance*,

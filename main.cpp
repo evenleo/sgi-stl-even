@@ -385,6 +385,8 @@ void queue_test() {
         std::cout << que.front() << " ";
         que.pop();
     }
+    std::cout << std::endl;
+    std::cout << "empty front(): " << que.front() << std::endl;
 }
 
 void priority_queue_test() {
